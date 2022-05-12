@@ -6,27 +6,23 @@ import {
   DAppProvider,
   MULTICALL_ADDRESSES,
 } from '@usedapp/core'
+import { extendTheme } from '@chakra-ui/react'
 import type { AppProps } from 'next/app'
 import React from 'react'
 import { MulticallContract } from '../artifacts/contracts/contractAddress'
 import { useApollo } from '../lib/apolloClient'
 
 // scaffold-eth's INFURA_ID, SWAP IN YOURS FROM https://infura.io/dashboard/ethereum
-export const INFURA_ID = '4a8fbad34ad74a4bae2954c87b78b9ca'
+export const API_KEY = process.env.ALCHEMY_API_KEY;
 
 const config: Config = {
   readOnlyUrls: {
-    [ChainId.Ropsten]: `https://ropsten.infura.io/v3/${INFURA_ID}`,
+    [ChainId.Mumbai]: `https://polygon-mumbai.g.alchemy.com/v2/${API_KEY}`,
     [ChainId.Hardhat]: 'http://localhost:8545',
     [ChainId.Localhost]: 'http://localhost:8545',
   },
   supportedChains: [
-    ChainId.Mainnet,
-    ChainId.Goerli,
-    ChainId.Kovan,
-    ChainId.Rinkeby,
-    ChainId.Ropsten,
-    ChainId.xDai,
+    ChainId.Mumbai,
     ChainId.Localhost,
     ChainId.Hardhat,
   ],
@@ -36,6 +32,20 @@ const config: Config = {
     [ChainId.Localhost]: MulticallContract,
   },
 }
+
+
+
+// 2. Extend the theme to include custom colors, fonts, etc
+const colors = {
+  brand: {
+    900: '#1a365d',
+    800: '#153e75',
+    700: '#2a69ac',
+  },
+}
+
+const theme = extendTheme({ colors })
+
 
 const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApollo(pageProps)
