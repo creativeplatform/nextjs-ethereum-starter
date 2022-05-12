@@ -1,4 +1,5 @@
-import { Box, Button, Divider, Heading, Input, Text } from '@chakra-ui/react'
+import { Box, Button, Divider, Heading, Input, Text, Flex, Avatar } from '@chakra-ui/react'
+import { CUIAutoComplete } from 'chakra-ui-autocomplete'
 import { ChainId, useEthers, useSendTransaction } from '@usedapp/core'
 import { ethers, providers, utils } from 'ethers'
 import React, { useReducer } from 'react'
@@ -6,6 +7,7 @@ import { YourContract as LOCAL_CONTRACT_ADDRESS } from '../artifacts/contracts/c
 import YourContract from '../artifacts/contracts/YourContract.sol/YourContract.json'
 import Layout from '../components/layout/Layout'
 import { YourContract as YourContractType } from '../types/typechain'
+import axios from 'axios';
 
 /**
  * Constants & Helpers
@@ -17,9 +19,28 @@ const localProvider = new providers.StaticJsonRpcProvider(
 
 const ROPSTEN_CONTRACT_ADDRESS = '0x6b61a52b1EA15f4b8dB186126e980208E1E18864'
 
+export interface Item {
+  avatar: string;
+  name: string;
+}
 /**
  * Prop Types
  */
+type Artist = {
+  results: [
+    {
+      songstats_artist_id: string;
+      avatar: string;
+      name: string;
+      site_url: string;
+    }
+  ]
+}
+
+type GetUsersResponse = {
+  data: Artist[];
+};
+
 type StateType = {
   greeting: string
   inputValue: string
@@ -42,6 +63,18 @@ type ActionType =
 /**
  * Component
  */
+
+ const artists = {
+  results: [
+    {
+      songstats_artist_id: "7aot8uey",
+      avatar: "https://i.scdn.co/image/ab6761610000e5ebcdce7620dc940db079bf4952",
+      name: "Ariana Grande",
+      site_url: "https://songstats.com/artist/7aot8uey/ariana-grande",
+    }
+  ]
+ }
+
 const initialState: StateType = {
   greeting: '',
   inputValue: '',
@@ -71,9 +104,69 @@ function reducer(state: StateType, action: ActionType): StateType {
   }
 }
 
+async function getArtists() {
+
+    // 👇️ const data: GetUsersResponse
+    const options = {
+      method: 'GET',
+      url: 'https://stoplight.io/mocks/songstats/api/12173793/artists/search',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Encoding': 'gzip, deflate, br',
+        Prefer: 'code=200',
+        apikey: 'af059dd1-1f0f-4acc-99d2-c27dd26a60d2'
+      },
+      params: {
+        q: "string"
+      }
+    };
+    
+    await axios.request(options).then(function (response) {
+      console.log(response.data);
+    }).catch(function (error) {
+      console.error(error);
+    });
+}
+
+console.log(getArtists());
+
 function HomeIndex(): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { account, chainId, library } = useEthers()
+
+  const [pickerItems, setPickerItems] = React.useState(artists);
+  const [selectedItems, setSelectedItems] = React.useState([]);
+
+  const handleCreateItem = (item) => {
+    setPickerItems ((curr) => [...curr, item]);
+    setSelectedItems((curr) => [...curr, item]);
+  };
+
+  const handleSelectedItemsChange = (selectedItems?: Item[]) => {
+    if (selectedItems) {
+      setSelectedItems(selectedItems);
+    }
+  };
+
+  const customRender = (selected) => {
+    return (
+      <Flex flexDir="row" alignItems="center">
+        <Avatar mr={2} size="sm" name={selected.label} />
+        <Text color={"black"}>{selected.label}</Text>
+      </Flex>
+    )
+  }
+
+  const customCreateItemRender = (value) => {
+    return (
+      <Text>
+        <Box as='span'>Create</Box>{' '}
+        <Box as='span' bg='red.300' fontWeight='bold'>
+          "{value}"
+        </Box>
+      </Text>
+    )
+  }
 
   const isLocalChain =
     chainId === ChainId.Localhost || chainId === ChainId.Hardhat
@@ -140,21 +233,25 @@ function HomeIndex(): JSX.Element {
   return (
     <Layout>
       <Heading as="h1" mb="8">
-        Next.js Ethereum Starter
+        Creative
       </Heading>
-      <Button
-        as="a"
-        size="lg"
-        colorScheme="teal"
-        variant="outline"
-        href="https://github.com/ChangoMan/nextjs-ethereum-starter"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Get the source code!
-      </Button>
+      <CUIAutoComplete
+            tagStyleProps={{
+              rounded: 'full'
+            }}
+            label="Choose preferred artist"
+            placeholder="Type an Artist"
+            onCreateItem={handleCreateItem}
+            items={pickerItems}
+            itemRenderer={customRender}
+            createItemRenderer={customCreateItemRender}
+            selectedItems={selectedItems}
+            onSelectedItemsChange={(changes) =>
+              handleSelectedItemsChange(changes.selectedItems)
+            }
+          />
       <Text mt="8" fontSize="xl">
-        This page only works on the ROPSTEN Testnet or on a Local Chain.
+        This page only works on the Mumbai Testnet or on a Local Chain.
       </Text>
       <Box maxWidth="container.sm" p="8" mt="8" bg="gray.100">
         <Text fontSize="xl">Contract Address: {CONTRACT_ADDRESS}</Text>
