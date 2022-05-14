@@ -257,7 +257,8 @@ function HomeIndex(): JSX.Element {
         <Text fontSize="xl">Contract Address: {CONTRACT_ADDRESS}</Text>
         <Divider my="8" borderColor="gray.400" />
         <Box>
-          <Text fontSize="lg">Track: {state.greeting}</Text>
+          <Text fontSize="lg">Image: {state.greeting}</Text>
+          <Text fontSize="lg">Track: </Text>
           <Button mt="2" colorScheme="teal" onClick={fetchContractGreeting}>
             Fetch Track
           </Button>
