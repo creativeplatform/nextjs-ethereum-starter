@@ -253,35 +253,24 @@ function HomeIndex(): JSX.Element {
       <Text mt="8" fontSize="xl">
         This page only works on the Mumbai Testnet or on a Local Chain.
       </Text>
-      <Box maxWidth="container.sm" p="8" mt="8" bg="gray.100">
+      <Box maxWidth="container.sm" p="8" mt="8" bg="gray.900">
         <Text fontSize="xl">Contract Address: {CONTRACT_ADDRESS}</Text>
         <Divider my="8" borderColor="gray.400" />
         <Box>
-          <Text fontSize="lg">Greeting: {state.greeting}</Text>
+          <Text fontSize="lg">Track: {state.greeting}</Text>
           <Button mt="2" colorScheme="teal" onClick={fetchContractGreeting}>
-            Fetch Greeting
+            Fetch Track
           </Button>
         </Box>
         <Divider my="8" borderColor="gray.400" />
         <Box>
-          <Input
-            bg="white"
-            type="text"
-            placeholder="Enter a Greeting"
-            onChange={(e) => {
-              dispatch({
-                type: 'SET_INPUT_VALUE',
-                inputValue: e.target.value,
-              })
-            }}
-          />
           <Button
             mt="2"
             colorScheme="teal"
             isLoading={state.isLoading}
             onClick={setContractGreeting}
           >
-            Set Greeting
+            Mint NFT
           </Button>
         </Box>
         <Divider my="8" borderColor="gray.400" />
