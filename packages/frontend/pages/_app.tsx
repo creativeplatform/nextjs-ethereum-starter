@@ -14,15 +14,18 @@ import { useApollo } from '../lib/apolloClient'
 
 // scaffold-eth's INFURA_ID, SWAP IN YOURS FROM https://infura.io/dashboard/ethereum
 export const API_KEY = process.env.ALCHEMY_API_KEY;
+export const INFURA_ID = process.env.INFURA_ID;
 
 const config: Config = {
   readOnlyUrls: {
     [ChainId.Mumbai]: `https://polygon-mumbai.g.alchemy.com/v2/${API_KEY}`,
+    [ChainId.Kovan]: `https://kovan.infura.io/v3/${INFURA_ID}`,
     [ChainId.Hardhat]: 'http://localhost:8545',
     [ChainId.Localhost]: 'http://localhost:8545',
   },
   supportedChains: [
     ChainId.Mumbai,
+    ChainId.Kovan,
     ChainId.Localhost,
     ChainId.Hardhat,
   ],
