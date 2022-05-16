@@ -251,7 +251,7 @@ function HomeIndex(): JSX.Element {
             }
           />
       <Text mt="8" fontSize="xl">
-        This page only works on the Mumbai Testnet or on a Local Chain.
+        This page only works on the Kovan Testnet or on a Local Chain.
       </Text>
       <Box maxWidth="container.sm" p="8" mt="8" bg="gray.900">
         <Text fontSize="xl">Contract Address: {CONTRACT_ADDRESS}</Text>
