@@ -30,6 +30,8 @@
     "@chakra-ui/theme": "^1.14.1",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
+    "@epnsproject/frontend-sdk-staging": "^1.7.9",
+    "@transak/transak-sdk": "^1.0.31",
     "@usedapp/core": "^0.4.1",
     "@web3-react/walletconnect-connector": "^6.2.0",
     "@web3-react/walletlink-connector": "^6.2.3",
@@ -44,7 +46,8 @@
     "lodash": "4.17.20",
     "next": "^11.0.1",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "styled-components": "^5.3.5"
   },
   "devDependencies": {
     "@superfluid-finance/ethereum-contracts": "^1.2.2",
