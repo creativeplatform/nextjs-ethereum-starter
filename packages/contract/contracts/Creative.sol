@@ -23,7 +23,7 @@ import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 contract Creative is
     Ownable,
     ERC20,
-    SuperAppBase,
+    SuperAppBase
 {
 
     uint32 public constant INDEX_ID = 0;
