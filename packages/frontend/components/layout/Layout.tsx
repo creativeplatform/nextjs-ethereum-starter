@@ -24,6 +24,7 @@ import Balance from '../Balance'
 import ConnectWallet from '../ConnectWallet'
 import Head, { MetaProps } from './Head'
 import { EmbedSDK, channels, OnSubscribeModal } from "@epnsproject/frontend-sdk-staging";
+import transakSDK from '@transak/transak-sdk';
 
 // Extends `window` to add `ethereum`.
 declare global {
@@ -153,6 +154,41 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
     });
   }, [account]);
 
+    function loadInit() {
+      let transak = new transakSDK({
+        apiKey: process.env.TRANSAK_API_KEY,  // Your API Key
+        environment: 'STAGING', // STAGING/PRODUCTION
+        hostURL: window.location.href,
+        widgetHeight: '625px',
+        widgetWidth: '500px',
+        // Examples of some of the customization parameters you can pass
+        defaultCryptoCurrency: 'MATIC', // Example 'ETH'
+        walletAddress: account, // Your customer's wallet address
+        //themeColor: '[COLOR_HEX]', // App theme color
+        fiatCurrency: 'USD', // If you want to limit fiat selection eg 'USD'
+        //email: '', // Your customer's email address
+        redirectURL: 'localhost:3000'    
+      });
+
+      transak.init();
+      
+      // To get all the events
+      transak.on(transak.ALL_EVENTS, (data) => {
+        console.log(data)
+      });
+      
+      // This will trigger when the user marks payment is made.
+      transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
+        console.log(orderData);
+        transak.close();
+      });
+      return () => {
+        transak.cleanup();
+      }
+    }
+  
+
+
 
   return (
     <>
@@ -195,6 +231,7 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
                     {truncateHash(account)}
                   </MenuButton>
                   <MenuList>
+                    <MenuItem onClick={loadInit}>Add Funds</MenuItem>
                     <MenuItem onClick={deactivate}>Disconnect</MenuItem>
                   </MenuList>
                 </Menu>
