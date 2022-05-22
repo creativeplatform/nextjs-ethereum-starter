@@ -8,6 +8,7 @@ import YourContract from '../artifacts/contracts/YourContract.sol/YourContract.j
 import Layout from '../components/layout/Layout'
 import { YourContract as YourContractType } from '../types/typechain'
 import axios from 'axios';
+import { result } from 'lodash'
 
 /**
  * Constants & Helpers
@@ -21,7 +22,7 @@ const ROPSTEN_CONTRACT_ADDRESS = '0x6b61a52b1EA15f4b8dB186126e980208E1E18864'
 
 export interface Item {
   avatar: string;
-  name: string;
+  value: string;
 }
 /**
  * Prop Types
@@ -134,11 +135,11 @@ function HomeIndex(): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { account, chainId, library } = useEthers()
 
-  const [pickerItems, setPickerItems] = React.useState(artists);
+  const [pickerItems, setPickerItems] = React.useState(artists.results);
   const [selectedItems, setSelectedItems] = React.useState([]);
 
-  const handleCreateItem = (item) => {
-    setPickerItems ((curr) => [...curr, item]);
+  const handleCreateItem = (item: Item) => {
+    setPickerItems([]);
     setSelectedItems((curr) => [...curr, item]);
   };
 
