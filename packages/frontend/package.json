@@ -42,8 +42,11 @@
     "ethers": "^5.1.4",
     "framer-motion": "^4",
     "graphql": "^15.3.0",
+    "install": "^0.13.0",
     "lodash": "4.17.20",
+    "mime": "^3.0.0",
     "next": "^11.0.1",
+    "nft.storage": "^6.3.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "styled-components": "^5.3.5"
