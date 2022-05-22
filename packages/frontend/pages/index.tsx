@@ -134,7 +134,7 @@ function HomeIndex(): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { account, chainId, library } = useEthers()
 
-  const [pickerItems, setPickerItems] = React.useState(artists);
+  const [pickerItems, setPickerItems] = React.useState(artists.results);
   const [selectedItems, setSelectedItems] = React.useState([]);
 
   const handleCreateItem = (item) => {

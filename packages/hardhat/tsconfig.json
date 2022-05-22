@@ -8,5 +8,5 @@
     "resolveJsonModule": true
   },
   "include": ["./scripts", "./test"],
-  "files": ["truffle.config.ts"]
+  "files": ["./hardhat.config.ts"]
 }
