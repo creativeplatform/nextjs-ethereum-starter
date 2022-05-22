@@ -2,7 +2,7 @@ import { Box, Button, Divider, Heading, Input, Text, Flex, Avatar } from '@chakr
 import { CUIAutoComplete } from 'chakra-ui-autocomplete'
 import { ChainId, useEthers, useSendTransaction } from '@usedapp/core'
 import { ethers, providers, utils } from 'ethers'
-import React, { useReducer } from 'react'
+import React, { useEffect, useReducer } from 'react'
 import { YourContract as LOCAL_CONTRACT_ADDRESS } from '../artifacts/contracts/contractAddress'
 import YourContract from '../artifacts/contracts/YourContract.sol/YourContract.json'
 import Layout from '../components/layout/Layout'
@@ -20,21 +20,17 @@ const localProvider = new providers.StaticJsonRpcProvider(
 const ROPSTEN_CONTRACT_ADDRESS = '0x6b61a52b1EA15f4b8dB186126e980208E1E18864'
 
 export interface Item {
-  avatar: string;
-  name: string;
+  label: string;
+  value: string;
 }
 /**
  * Prop Types
  */
 type Artist = {
-  results: [
-    {
-      songstats_artist_id: string;
-      avatar: string;
-      name: string;
-      site_url: string;
-    }
-  ]
+    songstats_artist_id: string;
+    avatar: string;
+    name: string;
+    site_url: string;
 }
 
 type GetUsersResponse = {
@@ -104,9 +100,18 @@ function reducer(state: StateType, action: ActionType): StateType {
   }
 }
 
-async function getArtists() {
+function HomeIndex(): JSX.Element {
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const { account, chainId, library } = useEthers()
 
-    // 👇️ const data: GetUsersResponse
+  const [pickerItems, setPickerItems] = React.useState([]);
+  const [selectedItems, setSelectedItems] = React.useState([]);
+
+  useEffect(() => {
+    getArtists();
+  }
+  , [])
+  const getArtists = async () => {
     const options = {
       method: 'GET',
       url: 'https://stoplight.io/mocks/songstats/api/12173793/artists/search',
@@ -120,25 +125,16 @@ async function getArtists() {
         q: "string"
       }
     };
-    
-    await axios.request(options).then(function (response) {
+     await axios.request(options).then((response) => {
+      setPickerItems(response.data);
       console.log(response.data);
     }).catch(function (error) {
       console.error(error);
     });
 }
 
-console.log(getArtists());
-
-function HomeIndex(): JSX.Element {
-  const [state, dispatch] = useReducer(reducer, initialState)
-  const { account, chainId, library } = useEthers()
-
-  const [pickerItems, setPickerItems] = React.useState(artists.results);
-  const [selectedItems, setSelectedItems] = React.useState([]);
-
   const handleCreateItem = (item) => {
-    setPickerItems ((curr) => [...curr, item]);
+    setPickerItems((curr) => [...curr, item]);
     setSelectedItems((curr) => [...curr, item]);
   };
 
@@ -151,7 +147,7 @@ function HomeIndex(): JSX.Element {
   const customRender = (selected) => {
     return (
       <Flex flexDir="row" alignItems="center">
-        <Avatar mr={2} size="sm" name={selected.label} />
+        <Avatar mr={2} size="sm" name={selected.avatar} />
         <Text color={"black"}>{selected.label}</Text>
       </Flex>
     )
@@ -235,6 +231,7 @@ function HomeIndex(): JSX.Element {
       <Heading as="h1" mb="8">
         Creative
       </Heading>
+      { pickerItems && (
       <CUIAutoComplete
             tagStyleProps={{
               rounded: 'full'
@@ -250,6 +247,7 @@ function HomeIndex(): JSX.Element {
               handleSelectedItemsChange(changes.selectedItems)
             }
           />
+      )}
       <Text mt="8" fontSize="xl">
         This page only works on the Kovan Testnet or on a Local Chain.
       </Text>
