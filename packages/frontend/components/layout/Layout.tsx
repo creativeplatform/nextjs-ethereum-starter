@@ -156,7 +156,7 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
 
   function loadInit() {
     let transak = new transakSDK({
-      apiKey: process.env.TRANSAK_API_KEY,  // Your API Key
+      apiKey: '07d4475a-4b8c-49d6-ba88-61075d649c6f',  // Your API Key
       environment: 'STAGING', // STAGING/PRODUCTION
       hostURL: window.location.href,
       widgetHeight: '625px',
