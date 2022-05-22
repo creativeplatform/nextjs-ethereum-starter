@@ -31,7 +31,6 @@
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@epnsproject/frontend-sdk-staging": "^1.7.9",
-    "@transak/transak-sdk": "^1.0.31",
     "@usedapp/core": "^0.4.1",
     "@web3-react/walletconnect-connector": "^6.2.0",
     "@web3-react/walletlink-connector": "^6.2.3",
