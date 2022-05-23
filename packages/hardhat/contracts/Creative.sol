@@ -1,243 +1,295 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.4;
 
-import {
-    ISuperfluid,
-    ISuperToken,
-    SuperAppBase,
-    SuperAppDefinitions
-} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
-import {
-    IInstantDistributionAgreementV1
-} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IInstantDistributionAgreementV1.sol";
-
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+import {ISuperfluid, ISuperToken, ISuperApp, ISuperAgreement, SuperAppDefinitions} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
+import {IInstantDistributionAgreementV1} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IInstantDistributionAgreementV1.sol";
+import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "hardhat/console.sol";
 
 /**
- * The dividends rights token show cases two use cases
- * 1. Use Instant distribution agreement to distribute tokens to token holders.
- * 2. Use SuperApp framework to update `isSubscribing` when new subscription is approved by token holder.
+ * @title Supertoken distribution contract
+ * @dev Contract which distributes tokens based on flow rate of a user using Superfluid IDA
+ * @author hebx
+ * @custom:experimental This is an experimental contract
  */
-contract Creative is
-    Ownable,
-    ERC20,
-    SuperAppBase
-{
+// solhint-disable not-rely-on-time
+contract Creative is Ownable, SuperAppBase {
+    uint32 public constant DIST_INDEX_ID = 0;
+    address public immutable streamToken;
+    address public immutable distToken;
+    uint256 public lastDistAt;
 
-    uint32 public constant INDEX_ID = 0;
-    uint8 private _decimals;
-
-    ISuperToken private _cashToken;
-    ISuperfluid private _host;
-    IInstantDistributionAgreementV1 private _ida;
-
-    // use callbacks to track approved subscriptions
-    mapping (address => bool) public isSubscribing;
+    ISuperfluid private host;
+    IConstantFlowAgreementV1 private cfa;
+    IInstantDistributionAgreementV1 private ida;
 
     constructor(
-        string memory name,
-        string memory symbol,
-        ISuperToken cashToken,
-        ISuperfluid host,
-        IInstantDistributionAgreementV1 ida)
-        ERC20(name, symbol)
-    {
-        _cashToken = cashToken;
-        _host = host;
-        _ida = ida;
+        ISuperfluid _host,
+        IConstantFlowAgreementV1 _cfa,
+        IInstantDistributionAgreementV1 _ida,
+        address _streamToken,
+        address _distToken
+        // string memory regKey
+    ) {
+        require(
+            address(_host) != address(0) &&
+                address(_cfa) != address(0) &&
+                address(_ida) != address(0),
+            "SF params invalid"
+        );
 
-        uint256 configWord =
-            SuperAppDefinitions.APP_LEVEL_FINAL |
-            SuperAppDefinitions.BEFORE_AGREEMENT_TERMINATED_NOOP |
-            SuperAppDefinitions.AFTER_AGREEMENT_TERMINATED_NOOP;
+        host = _host;
+        cfa = _cfa;
+        ida = _ida;
+        streamToken = _streamToken;
+        distToken = _distToken;
 
-        _host.registerApp(configWord);
+        uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL;
+
+        // (bytes(regKey).length > 0)
+        //     ? _host.registerAppWithKey(configWord, regKey)
+        //     :
+         _host.registerApp(configWord);
 
         _host.callAgreement(
             _ida,
             abi.encodeWithSelector(
                 _ida.createIndex.selector,
-                _cashToken,
-                INDEX_ID,
+                ISuperToken(_distToken),
+                DIST_INDEX_ID,
                 new bytes(0) // placeholder ctx
             ),
             new bytes(0) // user data
         );
-
-        transferOwnership(msg.sender);
-        _decimals = 0;
     }
 
-    function decimals() public view override returns (uint8) {
-        return _decimals;
+    function distribute() public returns (bytes memory _newCtx) {
+        ISuperToken superDistToken = ISuperToken(distToken);
+
+        (uint256 actualAmount, ) = ida.calculateDistribution(
+            superDistToken,
+            address(this),
+            DIST_INDEX_ID,
+            superDistToken.balanceOf(address(this))
+        );
+
+        require(
+            superDistToken.balanceOf(address(this)) >= actualAmount,
+            "FlowShares: !enough distTokens"
+        );
+
+        _newCtx = host.callAgreement(
+            ida,
+            abi.encodeWithSelector(
+                ida.distribute.selector,
+                superDistToken,
+                DIST_INDEX_ID,
+                actualAmount,
+                new bytes(0)
+            ),
+            new bytes(0)
+        );
+
+        lastDistAt = block.timestamp;
     }
 
-    function beforeAgreementCreated(
-        ISuperToken superToken,
-        address agreementClass,
-        bytes32 /* agreementId */,
-        bytes calldata /*agreementData*/,
-        bytes calldata /*ctx*/
-    )
-        external view override
-        returns (bytes memory data)
+    function calcUserUninvested(address _user)
+        public
+        view
+        returns (uint256 _userUninvested)
     {
-        require(superToken == _cashToken, "DRT: Unsupported cash token");
-        require(agreementClass == address(_ida), "DRT: Unsupported agreement");
-        return new bytes(0);
+        (uint256 _userPrevUpdateTimestamp, int96 _flowRate) = _getFlow(_user);
+        uint256 _userFlowRate = uint256(uint96(_flowRate));
+
+        _userUninvested =
+            _userFlowRate *
+            (block.timestamp -
+                (
+                    (_userPrevUpdateTimestamp > lastDistAt)
+                        ? _userPrevUpdateTimestamp
+                        : lastDistAt
+                ));
     }
 
-    function afterAgreementCreated(
-        ISuperToken superToken,
-        address /* agreementClass */,
-        bytes32 agreementId,
-        bytes calldata /*agreementData*/,
-        bytes calldata /*cbdata*/,
-        bytes calldata ctx
-    )
-        external override
-        returns(bytes memory newCtx)
+    function _updateShares(bytes memory _ctx)
+        internal
+        returns (bytes memory _newCtx)
     {
-        _checkSubscription(superToken, ctx, agreementId);
-        newCtx = ctx;
+        ISuperToken superDistToken = ISuperToken(distToken);
+        address msgSender = host.decodeCtx(_ctx).msgSender;
+        (, int96 flowRate) = _getFlow(msgSender);
+        uint256 userFlowRate = uint256(uint96(flowRate));
+
+        (_newCtx, ) = host.callAgreementWithContext(
+            ida,
+            abi.encodeWithSelector(
+                ida.updateSubscription.selector,
+                superDistToken,
+                DIST_INDEX_ID,
+                msgSender,
+                uint128(userFlowRate / 1e9),
+                new bytes(0)
+            ),
+            new bytes(0),
+            _ctx
+        );
     }
 
-    function beforeAgreementUpdated(
-        ISuperToken superToken,
-        address agreementClass,
-        bytes32 /* agreementId */,
-        bytes calldata /*agreementData*/,
-        bytes calldata /*ctx*/
-    )
-        external view override
-        returns (bytes memory data)
+    function _afterAgreement(bytes memory _ctx, bytes memory _cbdata)
+        internal
+        returns (bytes memory _newCtx)
     {
-        require(superToken == _cashToken, "DRT: Unsupported cash token");
-        require(agreementClass == address(_ida), "DRT: Unsupported agreement");
-        return new bytes(0);
+        address msgSender = host.decodeCtx(_ctx).msgSender;
+        uint256 userUninvested = abi.decode(_cbdata, (uint256));
+
+        _newCtx = _updateShares(_ctx);
+
+        ISuperToken(streamToken).transfer(msgSender, userUninvested);
     }
 
-    function afterAgreementUpdated(
-        ISuperToken superToken,
-        address /* agreementClass */,
-        bytes32 agreementId,
-        bytes calldata /*agreementData*/,
-        bytes calldata /*cbdata*/,
-        bytes calldata ctx
-    )
-        external override
-        returns(bytes memory newCtx)
+    function _beforeAgreement(bytes memory _ctx)
+        internal
+        view
+        returns (bytes memory _cbdata)
     {
-        _checkSubscription(superToken, ctx, agreementId);
-        newCtx = ctx;
+        address msgSender = host.decodeCtx(_ctx).msgSender;
+
+        _cbdata = abi.encode(
+            calcUserUninvested(msgSender)
+        );
     }
 
-    function _checkSubscription(
-        ISuperToken superToken,
-        bytes calldata ctx,
-        bytes32 agreementId
-    )
-        private
+    function _getFlow(address _user)
+        internal
+        view
+        returns (uint256 _timestamp, int96 _flowRate)
     {
-        ISuperfluid.Context memory context = _host.decodeCtx(ctx);
-        // only interested in the subscription approval callbacks
-        if (context.agreementSelector == IInstantDistributionAgreementV1.approveSubscription.selector) {
-            address publisher;
-            uint32 indexId;
-            bool approved;
-            uint128 units;
-            uint256 pendingDistribution;
-            (publisher, indexId, approved, units, pendingDistribution) =
-                _ida.getSubscriptionByID(superToken, agreementId);
+        (_timestamp, _flowRate, , ) = cfa.getFlow(
+            ISuperToken(streamToken),
+            _user,
+            address(this)
+        );
 
-            // sanity checks for testing purpose
-            require(publisher == address(this), "DRT: publisher mismatch");
-            require(indexId == INDEX_ID, "DRT: publisher mismatch");
+        // There shouldn't be any outflow from the contract
+        assert(_flowRate >= 0);
+    }
 
-            if (approved) {
-                isSubscribing[context.msgSender /* subscriber */] = true;
-            }
+    function _onlyExpected(ISuperToken _superToken, address _agreementClass)
+        internal
+        view
+    {
+        if (
+            ISuperAgreement(_agreementClass).agreementType() ==
+            keccak256(
+                "org.superfluid-finance.agreements.ConstantFlowAgreement.v1"
+            )
+        ) {
+            require(
+                address(_superToken) == streamToken,
+                "FlowShares: Not stream token"
+            );
+        } else if (
+            ISuperAgreement(_agreementClass).agreementType() ==
+            keccak256(
+                "org.superfluid-finance.agreements.InstantDistributionAgreement.v1"
+            )
+        ) {
+            require(
+                address(_superToken) == distToken,
+                "FlowShares: Not dist token"
+            );
         }
     }
 
-    /// @dev Issue new `amount` of giths to `beneficiary`
-    function issue(address beneficiary, uint256 amount) external onlyOwner {
-        // then adjust beneficiary subscription units
-        uint256 currentAmount = balanceOf(beneficiary);
-
-        // first try to do ERC20 mint
-        ERC20._mint(beneficiary, amount);
-
-        _host.callAgreement(
-            _ida,
-            abi.encodeWithSelector(
-                _ida.updateSubscription.selector,
-                _cashToken,
-                INDEX_ID,
-                beneficiary,
-                uint128(currentAmount) + uint128(amount),
-                new bytes(0) // placeholder ctx
-            ),
-            new bytes(0) // user data
-        );
+    function _onlyHost() internal view {
+        require(msg.sender == address(host), "FlowShares: Not host");
     }
 
-    /// @dev Distribute `amount` of cash among all token holders
-    function distribute(uint256 cashAmount) external onlyOwner {
-        (uint256 actualCashAmount,) = _ida.calculateDistribution(
-            _cashToken,
-            address(this), INDEX_ID,
-            cashAmount);
+    /********************************************
+     * Superfluid app callbacks
+     ********************************************/
 
-        _cashToken.transferFrom(owner(), address(this), actualCashAmount);
+    function beforeAgreementCreated(
+        ISuperToken _superToken,
+        address _agreementClass,
+        bytes32, // agreementId,
+        bytes calldata, // agreementData,
+        bytes calldata // ctx
+    ) external view override returns (bytes memory _cbdata) {
+        _onlyHost();
+        _onlyExpected(_superToken, _agreementClass);
 
-        _host.callAgreement(
-            _ida,
-            abi.encodeWithSelector(
-                _ida.distribute.selector,
-                _cashToken,
-                INDEX_ID,
-                actualCashAmount,
-                new bytes(0) // placeholder ctx
-            ),
-            new bytes(0) // user data
-        );
+        _cbdata = new bytes(0);
     }
 
-    /// @dev ERC20._transfer override
-    function _transfer(address sender, address recipient, uint256 amount) internal override {
-        uint128 senderUnits = uint128(ERC20.balanceOf(sender));
-        uint128 recipientUnits = uint128(ERC20.balanceOf(recipient));
-        // first try to do ERC20 transfer
-        ERC20._transfer(sender, recipient, amount);
+    function afterAgreementCreated(
+        ISuperToken _superToken,
+        address _agreementClass,
+        bytes32, // _agreementId,
+        bytes calldata, // agreementData
+        bytes calldata, // _cbdata
+        bytes calldata _ctx
+    ) external override returns (bytes memory _newCtx) {
+        _onlyHost();
+        _onlyExpected(_superToken, _agreementClass);
 
-        _host.callAgreement(
-            _ida,
-            abi.encodeWithSelector(
-                _ida.updateSubscription.selector,
-                _cashToken,
-                INDEX_ID,
-                sender,
-                senderUnits - uint128(amount),
-                new bytes(0) // placeholder ctx
-            ),
-            new bytes(0) // user data
-        );
-
-        _host.callAgreement(
-            _ida,
-            abi.encodeWithSelector(
-                _ida.updateSubscription.selector,
-                _cashToken,
-                INDEX_ID,
-                recipient,
-                recipientUnits + uint128(amount),
-                new bytes(0) // placeholder ctx
-            ),
-            new bytes(0) // user data
-        );
+        _newCtx = _updateShares(_ctx);
     }
 
+    function beforeAgreementUpdated(
+        ISuperToken _superToken,
+        address _agreementClass,
+        bytes32, // agreementId,
+        bytes calldata, // agreementData,
+        bytes calldata _ctx
+    ) external view override returns (bytes memory _cbdata) {
+        _onlyHost();
+        _onlyExpected(_superToken, _agreementClass);
+
+        _cbdata = _beforeAgreement(_ctx);
+    }
+
+    function afterAgreementUpdated(
+        ISuperToken _superToken,
+        address _agreementClass,
+        bytes32, //_agreementId
+        bytes calldata, // agreementData
+        bytes calldata _cbdata,
+        bytes calldata _ctx
+    ) external override returns (bytes memory _newCtx) {
+        _onlyHost();
+        _onlyExpected(_superToken, _agreementClass);
+
+        _newCtx = _afterAgreement(_ctx, _cbdata);
+    }
+
+    function beforeAgreementTerminated(
+        ISuperToken _superToken,
+        address _agreementClass,
+        bytes32, // agreementId,
+        bytes calldata, // agreementData,
+        bytes calldata _ctx
+    ) external view override returns (bytes memory _cbdata) {
+        _onlyHost();
+        _onlyExpected(_superToken, _agreementClass);
+
+        _cbdata = _beforeAgreement(_ctx);
+    }
+
+    function afterAgreementTerminated(
+        ISuperToken _superToken,
+        address _agreementClass,
+        bytes32, //_agreementId
+        bytes calldata, // agreementData
+        bytes calldata _cbdata,
+        bytes calldata _ctx
+    ) external override returns (bytes memory _newCtx) {
+        _onlyHost();
+        _onlyExpected(_superToken, _agreementClass);
+
+        _newCtx = _afterAgreement(_ctx, _cbdata);
+    }
 }

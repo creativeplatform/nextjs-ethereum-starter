@@ -13,6 +13,90 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "KeeperCompatibleInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.KeeperCompatibleInterface__factory>;
+    getContractFactory(
+      name: "KeeperBase",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.KeeperBase__factory>;
+    getContractFactory(
+      name: "KeeperCompatible",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.KeeperCompatible__factory>;
+    getContractFactory(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
+      name: "ERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20__factory>;
+    getContractFactory(
+      name: "IERC20Metadata",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Metadata__factory>;
+    getContractFactory(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20__factory>;
+    getContractFactory(
+      name: "IERC777",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC777__factory>;
+    getContractFactory(
+      name: "SuperAppBase",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SuperAppBase__factory>;
+    getContractFactory(
+      name: "IConstantFlowAgreementV1",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IConstantFlowAgreementV1__factory>;
+    getContractFactory(
+      name: "IInstantDistributionAgreementV1",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IInstantDistributionAgreementV1__factory>;
+    getContractFactory(
+      name: "ISuperAgreement",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISuperAgreement__factory>;
+    getContractFactory(
+      name: "ISuperApp",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISuperApp__factory>;
+    getContractFactory(
+      name: "ISuperfluid",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISuperfluid__factory>;
+    getContractFactory(
+      name: "ISuperfluidGovernance",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISuperfluidGovernance__factory>;
+    getContractFactory(
+      name: "ISuperfluidToken",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISuperfluidToken__factory>;
+    getContractFactory(
+      name: "ISuperToken",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISuperToken__factory>;
+    getContractFactory(
+      name: "ISuperTokenFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISuperTokenFactory__factory>;
+    getContractFactory(
+      name: "ERC20WithTokenInfo",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20WithTokenInfo__factory>;
+    getContractFactory(
+      name: "TokenInfo",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TokenInfo__factory>;
+    getContractFactory(
+      name: "Creative",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Creative__factory>;
+    getContractFactory(
       name: "Multicall",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Multicall__factory>;
