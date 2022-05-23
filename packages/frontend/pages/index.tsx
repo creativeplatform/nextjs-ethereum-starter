@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Heading, Input, Text, Flex, Avatar } from '@chakra-ui/react'
+import { Box, Button, Divider, Heading, Text, Flex, Avatar } from '@chakra-ui/react'
 import { CUIAutoComplete } from 'chakra-ui-autocomplete'
 import { ChainId, useEthers, useSendTransaction } from '@usedapp/core'
 import { ethers, providers, utils } from 'ethers'
@@ -26,16 +26,16 @@ export interface Item {
 /**
  * Prop Types
  */
-type Artist = {
-    songstats_artist_id: string;
-    avatar: string;
-    name: string;
-    site_url: string;
-}
+// type Artist = {
+//     songstats_artist_id: string;
+//     avatar: string;
+//     name: string;
+//     site_url: string;
+// }
 
-type GetUsersResponse = {
-  data: Artist[];
-};
+// type GetUsersResponse = {
+//   data: Artist[];
+// };
 
 type StateType = {
   greeting: string
@@ -60,16 +60,16 @@ type ActionType =
  * Component
  */
 
- const artists = {
-  results: [
-    {
-      songstats_artist_id: "7aot8uey",
-      avatar: "https://i.scdn.co/image/ab6761610000e5ebcdce7620dc940db079bf4952",
-      name: "Ariana Grande",
-      site_url: "https://songstats.com/artist/7aot8uey/ariana-grande",
-    }
-  ]
- }
+//  const artists = {
+//   results: [
+//     {
+//       songstats_artist_id: "7aot8uey",
+//       avatar: "https://i.scdn.co/image/ab6761610000e5ebcdce7620dc940db079bf4952",
+//       name: "Ariana Grande",
+//       site_url: "https://songstats.com/artist/7aot8uey/ariana-grande",
+//     }
+//   ]
+//  }
 
 const initialState: StateType = {
   greeting: '',
@@ -127,7 +127,7 @@ function HomeIndex(): JSX.Element {
     };
      await axios.request(options).then((response) => {
       setPickerItems(response.data);
-      console.log(response.data);
+      // console.log(response.data);
     }).catch(function (error) {
       console.error(error);
     });
@@ -158,7 +158,7 @@ function HomeIndex(): JSX.Element {
       <Text>
         <Box as='span'>Create</Box>{' '}
         <Box as='span' bg='red.300' fontWeight='bold'>
-          "{value}"
+          `{value}`
         </Box>
       </Text>
     )
@@ -249,7 +249,7 @@ function HomeIndex(): JSX.Element {
           />
       )}
       <Text mt="8" fontSize="xl">
-        This page only works on the Kovan Testnet or on a Local Chain.
+        This page only works on the Kovan Testnet, Mumbai Testnet or on a Local Chain.
       </Text>
       <Box maxWidth="container.sm" p="8" mt="8" bg="gray.900">
         <Text fontSize="xl">Contract Address: {CONTRACT_ADDRESS}</Text>
