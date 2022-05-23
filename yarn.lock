@@ -1457,6 +1457,7 @@
     find-cache-dir "^3.3.1"
     find-up "^4.1.0"
     fs-extra "^8.1.0"
+    fsevents "^2.3.2"
     function-bind "^1.1.1"
     glob-parent "^5.1.2"
     globals "^9.18.0"
@@ -6231,6 +6232,8 @@ chokidar@3.3.0:
     is-glob "~4.0.1"
     normalize-path "~3.0.0"
     readdirp "~3.2.0"
+  optionalDependencies:
+    fsevents "~2.1.1"
 
 chokidar@3.5.1, chokidar@^3.4.0:
   version "3.5.1"
@@ -6244,6 +6247,8 @@ chokidar@3.5.1, chokidar@^3.4.0:
     is-glob "~4.0.1"
     normalize-path "~3.0.0"
     readdirp "~3.5.0"
+  optionalDependencies:
+    fsevents "~2.3.1"
 
 chokidar@3.5.3, "chokidar@>=3.0.0 <4.0.0", chokidar@^3.5.2:
   version "3.5.3"
@@ -6257,6 +6262,8 @@ chokidar@3.5.3, "chokidar@>=3.0.0 <4.0.0", chokidar@^3.5.2:
     is-glob "~4.0.1"
     normalize-path "~3.0.0"
     readdirp "~3.6.0"
+  optionalDependencies:
+    fsevents "~2.3.2"
 
 chownr@^1.1.1:
   version "1.1.4"
@@ -11167,6 +11174,8 @@ jest-haste-map@^26.6.2:
     micromatch "^4.0.2"
     sane "^4.0.3"
     walker "^1.0.7"
+  optionalDependencies:
+    fsevents "^2.1.2"
 
 jest-jasmine2@^26.6.3:
   version "26.6.3"
