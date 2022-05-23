@@ -2,7 +2,7 @@
     "build": {
       "image": "fleek/next-js:node-16",
       "command": "yarn install && yarn run build && yarn run export",
-      "publicDir": "public",
+      "publicDir": "out",
       "baseDir": "packages/frontend"
     }
 }
