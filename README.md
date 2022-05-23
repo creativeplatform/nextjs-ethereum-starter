@@ -1,24 +1,8 @@
-# nextjs-ethereum-starter
+# Dividend Rights Token - a superfluid superapp demo
 
-This project was sponsored by the [BuidlGuidl](https://buidlguidl.com). Please support the BuidlGuidl if this project has been helpful!
+Creative is a gamified blockchain platform that connects independent artists, brands, and fans to create new opportunities for collaboration.
 
----
-
-My iteration of [Austin Griffith's scaffold-eth](https://github.com/austintgriffith/scaffold-eth).
-Also inspired by [Nader Dabit's blog post](https://dev.to/dabit3/the-complete-guide-to-full-stack-ethereum-development-3j13)
-
-- [Typescript](https://www.typescriptlang.org/)
-- [Hardhat](https://hardhat.org/)
-- [TypeChain](https://github.com/ethereum-ts/TypeChain)
-- [Ethers.js](https://docs.ethers.io/v5/)
-- [useDApp](https://usedapp.io/)
-- [Chakra UI](https://chakra-ui.com/)
-- Linting with [ESLint](https://eslint.org/)
-- Formatting with [Prettier](https://prettier.io/)
-- Linting, typechecking and formatting on by default using [`husky`](https://github.com/typicode/husky) for commit hooks
-- Testing with [Jest](https://jestjs.io/) and [`react-testing-library`](https://testing-library.com/docs/react-testing-library/intro)
-
-👀 [View the Live Demo](https://nextjs-ethereum-starter.vercel.app/)
+Brands get access to exclusive content and unique fan experiences while they can collaborate with creators in the process—allowing them to engage directly with their consumers on an intimate level. Creative also offers reward-based incentives through P2E DeFi (decentralized financial incentive) tokens which are used by collaborators as currency for rewards or compensation.
 
 ## Getting Started
 
