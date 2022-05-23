@@ -252,11 +252,11 @@ function HomeIndex(): JSX.Element {
         This page only works on the Kovan Testnet, Mumbai Testnet or on a Local Chain.
       </Text>
       <Box maxWidth="container.sm" p="8" mt="8" bg="gray.900">
-        <Text fontSize="xl">Contract Address: {CONTRACT_ADDRESS}</Text>
+        <Text fontSize="xl" color={'white'}>Contract Address: {CONTRACT_ADDRESS}</Text>
         <Divider my="8" borderColor="gray.400" />
         <Box>
-          <Text fontSize="lg">Image: {state.greeting}</Text>
-          <Text fontSize="lg">Track: </Text>
+          <Text fontSize="lg" color={'white'}>Image: {state.greeting}</Text>
+          <Text fontSize="lg" color={'white'}>Track: </Text>
           <Button mt="2" colorScheme="teal" onClick={fetchContractGreeting}>
             Fetch Track
           </Button>
@@ -273,7 +273,7 @@ function HomeIndex(): JSX.Element {
           </Button>
         </Box>
         <Divider my="8" borderColor="gray.400" />
-        <Text mb="4">This button only works on a Local Chain.</Text>
+        <Text mb="4" color={'white'}>This button only works on a Local Chain.</Text>
         <Button
           colorScheme="teal"
           onClick={sendFunds}

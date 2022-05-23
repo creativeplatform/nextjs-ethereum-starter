@@ -38,7 +38,7 @@ This project uses mainly Superfluid to distribute streaming royalties to creator
 This project uses Yarn Workspaces, so you'll need [Yarn](https://classic.yarnpkg.com/en/docs/install)
 
 ```bash
-git clone https://github.com/ChangoMan/nextjs-ethereum-starter.git
+https://github.com/creativeplatform/nextjs-ethereum-starter
 cd nextjs-ethereum-starter
 
 yarn install
