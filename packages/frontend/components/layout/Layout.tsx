@@ -95,10 +95,10 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
         },
         theme: 'light',
         onOpen: () => {
-          console.log('-> client dApp onOpen callback');
+          // console.log('-> client dApp onOpen callback');
         },
         onClose: () => {
-          console.log('-> client dApp onClose callback');
+          // console.log('-> client dApp onClose callback');
         }
       });
     }
@@ -108,9 +108,9 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
     };
   }, []);
 
-  const onClickHandler = (e) => {
+  const onClickHandler = () => {
 
-    
+
     if (!isSubscribed) {
       channels.optIn(
         library.getSigner(account),
@@ -119,7 +119,7 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
         account,
         {
           onSuccess: () => {
-            console.log("channel opted in");
+            // console.log("channel opted in");
             setShowModal(true);
             setSubscribeStatus(true);
           }
@@ -133,14 +133,14 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
         account,
         {
           onSuccess: () => {
-            console.log("channel opted out");
+            // console.log("channel opted out");
             setSubscribeStatus(false);
           }
         }
       );
     }
   };
-  
+
   useEffect(() => {
     if (!account) return;
 
@@ -155,7 +155,7 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
   }, [account]);
 
   function loadInit() {
-    let transak = new transakSDK({
+    const transak = new transakSDK({
       apiKey: '07d4475a-4b8c-49d6-ba88-61075d649c6f',  // Your API Key
       environment: 'STAGING', // STAGING/PRODUCTION
       hostURL: window.location.href,
@@ -167,19 +167,19 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
       //themeColor: '[COLOR_HEX]', // App theme color
       fiatCurrency: 'USD', // If you want to limit fiat selection eg 'USD'
       //email: '', // Your customer's email address
-      redirectURL: 'localhost:3000'    
+      redirectURL: 'localhost:3000'
     });
 
     transak.init();
 
     // To get all the events
-    transak.on(transak.ALL_EVENTS, (data) => {
-      console.log(data)
+    transak.on(transak.ALL_EVENTS, (/*data*/) => {
+      // console.log(data)
     });
 
     // This will trigger when the user marks payment is made.
-    transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
-      console.log(orderData);
+    transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (/*orderData*/) => {
+      // console.log(orderData);
       transak.close();
     });
     return () => {

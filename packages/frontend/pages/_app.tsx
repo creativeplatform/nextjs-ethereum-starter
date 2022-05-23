@@ -6,7 +6,7 @@ import {
   DAppProvider,
   MULTICALL_ADDRESSES,
 } from '@usedapp/core'
-import { extendTheme } from '@chakra-ui/react'
+// import { extendTheme } from '@chakra-ui/react'
 import type { AppProps } from 'next/app'
 import React from 'react'
 import { MulticallContract } from '../artifacts/contracts/contractAddress'
@@ -39,15 +39,15 @@ const config: Config = {
 
 
 // 2. Extend the theme to include custom colors, fonts, etc
-const colors = {
-  brand: {
-    900: '#1a365d',
-    800: '#153e75',
-    700: '#2a69ac',
-  },
-}
+// const colors = {
+//   brand: {
+//     900: '#1a365d',
+//     800: '#153e75',
+//     700: '#2a69ac',
+//   },
+// }
 
-const theme = extendTheme({ colors })
+// const theme = extendTheme({ colors })
 
 
 const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
