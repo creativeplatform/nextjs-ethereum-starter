@@ -1,12 +1,9 @@
 {
     "build": {
       "image": "node:alpine",
-      "command": "yarn install && yarn run build && echo $SOME_ENV",
+      "command": "yarn install && yarn run build && yarn run export",
       "publicDir": "public",
-      "baseDir": "packages/frontend",
-      "environment": {
-        "SOME_ENV": "Build finished!"
-      }
+      "baseDir": "packages/frontend"
     }
-   }
+}
    
