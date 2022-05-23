@@ -25,6 +25,7 @@ yarn-error.log*
 .vercel
 
 node_modules
+yarn.lock
 
 ## Hardhat files ##
 packages/hardhat/*.txt
