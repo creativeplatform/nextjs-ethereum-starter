@@ -53,13 +53,13 @@ const config: Config = {
 const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApollo(pageProps)
   return (
-    <ApolloProvider client={apolloClient}>
-      <DAppProvider config={config}>
-        <ChakraProvider>
-          <Component {...pageProps} />
-        </ChakraProvider>
-      </DAppProvider>
-    </ApolloProvider>
+      <ApolloProvider client={apolloClient}>
+        <DAppProvider config={config}>
+          <ChakraProvider>
+            <Component {...pageProps} />
+          </ChakraProvider>
+        </DAppProvider>
+      </ApolloProvider>
   )
 }
 

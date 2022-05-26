@@ -1,13 +1,18 @@
-import { Box, Button, Divider, Heading, Text, Flex, Avatar } from '@chakra-ui/react'
-import { CUIAutoComplete } from 'chakra-ui-autocomplete'
-import { ChainId, useEthers, useSendTransaction } from '@usedapp/core'
-import { ethers, providers, utils } from 'ethers'
-import React, { useEffect, useReducer } from 'react'
-import { YourContract as LOCAL_CONTRACT_ADDRESS } from '../artifacts/contracts/contractAddress'
-import YourContract from '../artifacts/contracts/YourContract.sol/YourContract.json'
-import Layout from '../components/layout/Layout'
-import { YourContract as YourContractType } from '../types/typechain'
+import { Box, Button, Divider, Heading, Text, Flex, Avatar } from '@chakra-ui/react';
+import { CUIAutoComplete } from 'chakra-ui-autocomplete';
+import { ChainId, useEthers, useSendTransaction } from '@usedapp/core';
+import { ethers, providers, utils } from 'ethers';
+import React, { useEffect, useReducer } from 'react';
+import { YourContract as LOCAL_CONTRACT_ADDRESS } from '../artifacts/contracts/contractAddress';
+import YourContract from '../artifacts/contracts/YourContract.sol/YourContract.json';
+import Layout from '../components/layout/Layout';
+import { YourContract as YourContractType } from '../types/typechain';
 import axios from 'axios';
+import { MoralisProvider } from 'react-moralis';
+import { UserProvider } from '../services/context/users';
+
+const MORALIS_SERVER_URL="https://mhuq3oogbqkc.usemoralis.com:2053/server";
+const MORALIS_API_KEY="PHlSfKMAm45Y8HaNDsOImY3GI7Hst5AORiClsht6";
 
 /**
  * Constants & Helpers
@@ -125,7 +130,7 @@ function HomeIndex(): JSX.Element {
         q: "string"
       }
     };
-     await axios.request(options).then((response) => {
+    await axios.request(options).then((response) => {
       setPickerItems(response.data);
       // console.log(response.data);
     }).catch(function (error) {
@@ -227,62 +232,66 @@ function HomeIndex(): JSX.Element {
   }
 
   return (
-    <Layout>
-      <Heading as="h1" mb="8">
-        Creative
-      </Heading>
-      { pickerItems && (
-      <CUIAutoComplete
-            tagStyleProps={{
-              rounded: 'full'
-            }}
-            label="Choose preferred artist"
-            placeholder="Type an Artist"
-            onCreateItem={handleCreateItem}
-            items={pickerItems}
-            itemRenderer={customRender}
-            createItemRenderer={customCreateItemRender}
-            selectedItems={selectedItems}
-            onSelectedItemsChange={(changes) =>
-              handleSelectedItemsChange(changes.selectedItems)
-            }
-          />
-      )}
-      <Text mt="8" fontSize="xl">
-        This page only works on the Kovan Testnet, Mumbai Testnet or on a Local Chain.
-      </Text>
-      <Box maxWidth="container.sm" p="8" mt="8" bg="gray.900">
-        <Text fontSize="xl" color={'white'}>Contract Address: {CONTRACT_ADDRESS}</Text>
-        <Divider my="8" borderColor="gray.400" />
-        <Box>
-          <Text fontSize="lg" color={'white'}>Image: {state.greeting}</Text>
-          <Text fontSize="lg" color={'white'}>Track: </Text>
-          <Button mt="2" colorScheme="teal" onClick={fetchContractGreeting}>
-            Fetch Track
-          </Button>
-        </Box>
-        <Divider my="8" borderColor="gray.400" />
-        <Box>
-          <Button
-            mt="2"
-            colorScheme="teal"
-            isLoading={state.isLoading}
-            onClick={setContractGreeting}
-          >
-            Mint NFT
-          </Button>
-        </Box>
-        <Divider my="8" borderColor="gray.400" />
-        <Text mb="4" color={'white'}>This button only works on a Local Chain.</Text>
-        <Button
-          colorScheme="teal"
-          onClick={sendFunds}
-          isDisabled={!isLocalChain}
-        >
-          Send Funds From Local Hardhat Chain
-        </Button>
-      </Box>
-    </Layout>
+    <MoralisProvider serverUrl={MORALIS_SERVER_URL} appId={MORALIS_API_KEY}>
+      <UserProvider> 
+        <Layout>
+          <Heading as="h1" mb="8">
+            Creative
+          </Heading>
+          { pickerItems && (
+          <CUIAutoComplete
+                tagStyleProps={{
+                  rounded: 'full'
+                }}
+                label="Choose preferred artist"
+                placeholder="Type an Artist"
+                onCreateItem={handleCreateItem}
+                items={pickerItems}
+                itemRenderer={customRender}
+                createItemRenderer={customCreateItemRender}
+                selectedItems={selectedItems}
+                onSelectedItemsChange={(changes) =>
+                  handleSelectedItemsChange(changes.selectedItems)
+                }
+              />
+          )}
+          <Text mt="8" fontSize="xl">
+            This page only works on the Kovan Testnet, Mumbai Testnet or on a Local Chain.
+          </Text>
+          <Box maxWidth="container.sm" p="8" mt="8" bg="gray.900">
+            <Text fontSize="xl" color={'white'}>Contract Address: {CONTRACT_ADDRESS}</Text>
+            <Divider my="8" borderColor="gray.400" />
+            <Box>
+              <Text fontSize="lg" color={'white'}>Image: {state.greeting}</Text>
+              <Text fontSize="lg" color={'white'}>Track: </Text>
+              <Button mt="2" colorScheme="teal" onClick={fetchContractGreeting}>
+                Fetch Track
+              </Button>
+            </Box>
+            <Divider my="8" borderColor="gray.400" />
+            <Box>
+              <Button
+                mt="2"
+                colorScheme="teal"
+                isLoading={state.isLoading}
+                onClick={setContractGreeting}
+              >
+                Mint NFT
+              </Button>
+            </Box>
+            <Divider my="8" borderColor="gray.400" />
+            <Text mb="4" color={'white'}>This button only works on a Local Chain.</Text>
+            <Button
+              colorScheme="teal"
+              onClick={sendFunds}
+              isDisabled={!isLocalChain}
+            >
+              Send Funds From Local Hardhat Chain
+            </Button>
+          </Box>
+        </Layout>
+      </UserProvider>
+    </MoralisProvider>
   )
 }
 
