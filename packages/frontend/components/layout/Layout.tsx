@@ -21,10 +21,13 @@ import blockies from 'blockies-ts'
 import NextLink from 'next/link'
 import React, { useEffect, useState } from 'react'
 import Balance from '../Balance'
-import ConnectWallet from '../ConnectWallet'
+import ConnectWallet from '../common/auth/ConnectWallet'
 import Head, { MetaProps } from './Head'
 import { EmbedSDK, channels, OnSubscribeModal } from "@epnsproject/frontend-sdk-staging";
 import transakSDK from '@transak/transak-sdk';
+import { useUsersContext } from '../../services/context/users';
+import SignIn from '../common/auth/SignIn';
+import SignUp from '../common/auth/SignUp';
 
 // Extends `window` to add `ethereum`.
 declare global {
@@ -69,7 +72,7 @@ interface LayoutProps {
 const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
   const { account, deactivate, active, chainId, library } = useEthers();
   const { notifications } = useNotifications();
-
+  const { isLoggedIn } = useUsersContext();
 
   const [isSubscribed, setSubscribeStatus] = useState(false);
   const [channel, setChannel] = useState();
@@ -230,7 +233,15 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
                   </MenuButton>
                   <MenuList>
                     <MenuItem onClick={loadInit}>Add Funds</MenuItem>
-                    <MenuItem onClick={deactivate}>Disconnect</MenuItem>
+                    {isLoggedIn && (
+                      <MenuItem onClick={deactivate}>Disconnect</MenuItem>
+                    )}
+                    {!isLoggedIn && (
+                      <MenuItem><SignIn /></MenuItem>
+                    )}
+                    {!isLoggedIn && (
+                      <MenuItem><SignUp /></MenuItem>
+                    )}
                   </MenuList>
                 </Menu>
               </Flex>
