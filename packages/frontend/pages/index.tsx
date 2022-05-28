@@ -160,8 +160,7 @@ function HomeIndex(): JSX.Element {
             <Box>
               <Text>Pick Your Stage Name To Fetch All Tracks</Text>
               <Select isDisabled={artistSelectIsDisabled} onChange={handleArtist}>
-                {
-                  artists?.map((el, i) => {
+                {artists && artists?.map((el, i) => {
                     return (
                       <option key={i} value={i}>{el.name}</option>
                     )
