@@ -10,7 +10,9 @@ import {
 import type { AppProps } from 'next/app'
 import React from 'react'
 import { MulticallContract } from '../artifacts/contracts/contractAddress'
+import { MoralisProvider } from 'react-moralis'
 import { useApollo } from '../lib/apolloClient'
+import { AuthProvider} from '../services/context/users'
 
 // scaffold-eth's INFURA_ID, SWAP IN YOURS FROM https://infura.io/dashboard/ethereum
 export const API_KEY = process.env.ALCHEMY_API_KEY;
@@ -36,6 +38,8 @@ const config: Config = {
   },
 }
 
+const MORALIS_SERVER_URL="https://mhuq3oogbqkc.usemoralis.com:2053/server";
+const MORALIS_API_KEY="PHlSfKMAm45Y8HaNDsOImY3GI7Hst5AORiClsht6";
 
 
 // 2. Extend the theme to include custom colors, fonts, etc
@@ -53,13 +57,17 @@ const config: Config = {
 const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApollo(pageProps)
   return (
+    <MoralisProvider serverUrl={MORALIS_SERVER_URL} appId={MORALIS_API_KEY}>
       <ApolloProvider client={apolloClient}>
         <DAppProvider config={config}>
           <ChakraProvider>
-            <Component {...pageProps} />
+            <AuthProvider>
+              <Component {...pageProps} />
+            </AuthProvider>
           </ChakraProvider>
         </DAppProvider>
       </ApolloProvider>
+      </MoralisProvider>
   )
 }
 

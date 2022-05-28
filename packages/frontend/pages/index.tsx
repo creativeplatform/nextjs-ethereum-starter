@@ -1,121 +1,42 @@
-import { Box, Button, Divider, Heading, Text, Flex, Avatar } from '@chakra-ui/react';
-import { CUIAutoComplete } from 'chakra-ui-autocomplete';
-import { ChainId, useEthers, useSendTransaction } from '@usedapp/core';
-import { ethers, providers, utils } from 'ethers';
-import React, { useEffect, useReducer } from 'react';
-import { YourContract as LOCAL_CONTRACT_ADDRESS } from '../artifacts/contracts/contractAddress';
-import YourContract from '../artifacts/contracts/YourContract.sol/YourContract.json';
-import Layout from '../components/layout/Layout';
-import { YourContract as YourContractType } from '../types/typechain';
-import axios from 'axios';
-import { MoralisProvider } from 'react-moralis';
-import { UserProvider } from '../services/context/users';
-
-const MORALIS_SERVER_URL="https://mhuq3oogbqkc.usemoralis.com:2053/server";
-const MORALIS_API_KEY="PHlSfKMAm45Y8HaNDsOImY3GI7Hst5AORiClsht6";
-
-/**
- * Constants & Helpers
- */
-
-const localProvider = new providers.StaticJsonRpcProvider(
-  'http://localhost:8545'
-)
-
-const ROPSTEN_CONTRACT_ADDRESS = '0x6b61a52b1EA15f4b8dB186126e980208E1E18864'
-
-export interface Item {
-  label: string;
-  value: string;
-}
-/**
- * Prop Types
- */
-// type Artist = {
-//     songstats_artist_id: string;
-//     avatar: string;
-//     name: string;
-//     site_url: string;
-// }
-
-// type GetUsersResponse = {
-//   data: Artist[];
-// };
-
-type StateType = {
-  greeting: string
-  inputValue: string
-  isLoading: boolean
-}
-type ActionType =
-  | {
-      type: 'SET_GREETING'
-      greeting: StateType['greeting']
-    }
-  | {
-      type: 'SET_INPUT_VALUE'
-      inputValue: StateType['inputValue']
-    }
-  | {
-      type: 'SET_LOADING'
-      isLoading: StateType['isLoading']
-    }
-
-/**
- * Component
- */
-
-//  const artists = {
-//   results: [
-//     {
-//       songstats_artist_id: "7aot8uey",
-//       avatar: "https://i.scdn.co/image/ab6761610000e5ebcdce7620dc940db079bf4952",
-//       name: "Ariana Grande",
-//       site_url: "https://songstats.com/artist/7aot8uey/ariana-grande",
-//     }
-//   ]
-//  }
-
-const initialState: StateType = {
-  greeting: '',
-  inputValue: '',
-  isLoading: false,
-}
-
-function reducer(state: StateType, action: ActionType): StateType {
-  switch (action.type) {
-    // Track the greeting from the blockchain
-    case 'SET_GREETING':
-      return {
-        ...state,
-        greeting: action.greeting,
-      }
-    case 'SET_INPUT_VALUE':
-      return {
-        ...state,
-        inputValue: action.inputValue,
-      }
-    case 'SET_LOADING':
-      return {
-        ...state,
-        isLoading: action.isLoading,
-      }
-    default:
-      throw new Error()
-  }
-}
+import { Box, Button, Divider, Flex, Heading, Text, Select } from '@chakra-ui/react'
+import { useEthers } from '@usedapp/core'
+import { Contract } from 'ethers'
+import React, { useEffect } from 'react'
+import Layout from '../components/layout/Layout'
+import axios from 'axios'
+import { useAuth } from '../services/context/users'
+import { Artist, NFTMetadata, Track } from '../services/textile/types'
+import { TextileInstance } from '../services/textile/textile'
+import abi from "../contracts/creative.abi.js"
+import address from "../contracts/YourCollectible.address"
+import { toast } from 'react-toastify'
+import ConnectWallet from "../components/common/auth/ConnectWallet";
+import SignIn from "../components/common/auth/SignIn";
+import SignUp from "../components/common/auth/SignUp";
 
 function HomeIndex(): JSX.Element {
-  const [state, dispatch] = useReducer(reducer, initialState)
-  const { account, chainId, library } = useEthers()
+  const { library } = useEthers();
+  const { user } = useAuth();
 
-  const [pickerItems, setPickerItems] = React.useState([]);
-  const [selectedItems, setSelectedItems] = React.useState([]);
+  const [submitDisabled, setSubmitDisabled] = React.useState(true);
+  const [trackSelectIsEnabled, setTrackSelectIsEnabled] = React.useState<boolean>(true);
+  const [artistSelectIsDisabled, setArtistSelectIsDisabled] = React.useState<boolean>(true);
+  // const [preview, setPreview] = React.useState("");
+
+  const [artists, setArtists] = React.useState<Artist[]>();
+  const [artist, setArtist] = React.useState<Artist>();
+  const [tracks, setTracks] = React.useState<Track[]>();
+  const [track, setTrack] = React.useState<Track>();
 
   useEffect(() => {
-    getArtists();
-  }
-  , [])
+    user ? getArtists() : undefined;
+  }, [user]);
+
+  // create a preview as a side effect, whenever selected file is changed
+  // useEffect(() => {
+    // setPreview(track.image);
+  // }, [track]);
+
   const getArtists = async () => {
     const options = {
       method: 'GET',
@@ -127,171 +48,164 @@ function HomeIndex(): JSX.Element {
         apikey: 'af059dd1-1f0f-4acc-99d2-c27dd26a60d2'
       },
       params: {
-        q: "string"
+        q: 'Ariana Grande'
       }
     };
     await axios.request(options).then((response) => {
-      setPickerItems(response.data);
-      // console.log(response.data);
+      setArtists(response.data);
+      setArtistSelectIsDisabled(true);
+      if (response.data.length === 1) {
+        getCatalog();
+      }
     }).catch(function (error) {
       console.error(error);
     });
-}
-
-  const handleCreateItem = (item) => {
-    setPickerItems((curr) => [...curr, item]);
-    setSelectedItems((curr) => [...curr, item]);
   };
 
-  const handleSelectedItemsChange = (selectedItems?: Item[]) => {
-    if (selectedItems) {
-      setSelectedItems(selectedItems);
-    }
-  };
-
-  const customRender = (selected) => {
-    return (
-      <Flex flexDir="row" alignItems="center">
-        <Avatar mr={2} size="sm" name={selected.avatar} />
-        <Text color={"black"}>{selected.label}</Text>
-      </Flex>
-    )
-  }
-
-  const customCreateItemRender = (value) => {
-    return (
-      <Text>
-        <Box as='span'>Create</Box>{' '}
-        <Box as='span' bg='red.300' fontWeight='bold'>
-          `{value}`
-        </Box>
-      </Text>
-    )
-  }
-
-  const isLocalChain =
-    chainId === ChainId.Localhost || chainId === ChainId.Hardhat
-
-  const CONTRACT_ADDRESS =
-    chainId === ChainId.Ropsten
-      ? ROPSTEN_CONTRACT_ADDRESS
-      : LOCAL_CONTRACT_ADDRESS
-
-  // Use the localProvider as the signer to send ETH to our wallet
-  const { sendTransaction } = useSendTransaction({
-    signer: localProvider.getSigner(),
-  })
-
-  // call the smart contract, read the current greeting value
-  async function fetchContractGreeting() {
-    if (library) {
-      const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        YourContract.abi,
-        library
-      ) as YourContractType
-      try {
-        const data = await contract.greeting()
-        dispatch({ type: 'SET_GREETING', greeting: data })
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.log('Error: ', err)
+  const getCatalog = async () => {
+    const options = {
+      method: 'GET',
+      url: 'https://stoplight.io/mocks/songstats/api/12173793/artists/catalog',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Encoding': 'gzip, deflate, br',
+        Prefer: 'code=200',
+        apikey: 'af059dd1-1f0f-4acc-99d2-c27dd26a60d2'
+      },
+      params: {
+        links: [
+          {
+          title: track.title,
+          } 
+        ],
+        artist_info: {
+          songstats_artist_id: artist.songstats_artist_id,
+          name: artist.name,
+          site_url: artist.site_url,
+        }
       }
-    }
+    };
+    await axios.request(options).then((response) => {
+      setTracks(response.data);
+      setTrackSelectIsEnabled(false);
+    }).catch(function (error) {
+      console.error(error);
+    });
+  };
+
+  const getTrack = async () => {
+    const options = {
+      method: 'GET',
+      url: 'https://stoplight.io/mocks/songstats/api/12173793/tracks/stats',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Encoding': 'gzip, deflate, br',
+        Prefer: 'code=200',
+        apikey: 'af059dd1-1f0f-4acc-99d2-c27dd26a60d2'
+      },
+      params: {
+        songstats_track_id: track.songstats_track_id,
+        source: "spotify"
+      }
+    };
+    await axios.request(options).then((response) => {
+      setTrack(response.data);
+      setSubmitDisabled(true);
+    }).catch(function (error) {
+      console.error(error);
+    });
+  };
+
+  const handleMint = async () => {
+    setSubmitDisabled(false);
+    // setSpin(true);
+
+    const textileInstance = await TextileInstance.getInstance();
+
+    const contract = new Contract(address, abi, library.getSigner());
+
+    // CONTRACT INTERACTION 
+
+    // contract....
+
   }
 
-  // call the smart contract, send an update
-  async function setContractGreeting() {
-    if (!state.inputValue) return
-    if (library) {
-      dispatch({
-        type: 'SET_LOADING',
-        isLoading: true,
-      })
-      const signer = library.getSigner()
-      const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        YourContract.abi,
-        signer
-      ) as YourContractType
-      const transaction = await contract.setGreeting(state.inputValue)
-      await transaction.wait()
-      fetchContractGreeting()
-      dispatch({
-        type: 'SET_LOADING',
-        isLoading: false,
-      })
-    }
+  const handleArtist = async (e) => {
+    e.preventDefault();
+    const i = parseInt(e.target.value);
+    setArtist(artists[i]);
+    getCatalog();
   }
 
-  function sendFunds(): void {
-    sendTransaction({
-      to: account,
-      value: utils.parseEther('0.1'),
-    })
+  const handleTrack = async (e) => {
+    e.preventDefault();
+    const i = parseInt(e.target.value);
+    setTrack(tracks[i]);
+    getTrack();
   }
 
   return (
-    <MoralisProvider serverUrl={MORALIS_SERVER_URL} appId={MORALIS_API_KEY}>
-      <UserProvider> 
+    
         <Layout>
           <Heading as="h1" mb="8">
             Creative
           </Heading>
-          { pickerItems && (
-          <CUIAutoComplete
-                tagStyleProps={{
-                  rounded: 'full'
-                }}
-                label="Choose preferred artist"
-                placeholder="Type an Artist"
-                onCreateItem={handleCreateItem}
-                items={pickerItems}
-                itemRenderer={customRender}
-                createItemRenderer={customCreateItemRender}
-                selectedItems={selectedItems}
-                onSelectedItemsChange={(changes) =>
-                  handleSelectedItemsChange(changes.selectedItems)
-                }
-              />
-          )}
           <Text mt="8" fontSize="xl">
             This page only works on the Kovan Testnet, Mumbai Testnet or on a Local Chain.
           </Text>
+          {user ? (
           <Box maxWidth="container.sm" p="8" mt="8" bg="gray.900">
-            <Text fontSize="xl" color={'white'}>Contract Address: {CONTRACT_ADDRESS}</Text>
+            <Text fontSize="xl" color={'white'}>Contract Address: {address}</Text>
             <Divider my="8" borderColor="gray.400" />
             <Box>
-              <Text fontSize="lg" color={'white'}>Image: {state.greeting}</Text>
-              <Text fontSize="lg" color={'white'}>Track: </Text>
-              <Button mt="2" colorScheme="teal" onClick={fetchContractGreeting}>
-                Fetch Track
-              </Button>
+              <Text>Pick Your Stage Name To Fetch All Tracks</Text>
+              <Select isDisabled={artistSelectIsDisabled} onChange={handleArtist}>
+                {
+                  artists?.map((el, i) => {
+                    return (
+                      <option key={i} value={i}>{el.name}</option>
+                    )
+                  })
+                }
+              </Select>
+              <Text>Pick A Track To Request An Advance</Text>
+              <Select isDisabled={trackSelectIsEnabled} onChange={handleTrack}>
+                {tracks && tracks.map((el, i) => (
+                  <option value={i}>
+                    <Text fontSize="lg" color={'white'}>Image: {el && <img src={el?.avatar} />}</Text>
+                    <Text fontSize="lg" color={'white'}>Artists: {el && <span>{el?.artists}</span>}</Text>
+                    <Text fontSize="lg" color={'white'}>Track: {el && <span>{el?.title}</span>}</Text>
+                  </option>
+                ))}
+              </Select>
             </Box>
             <Divider my="8" borderColor="gray.400" />
             <Box>
               <Button
                 mt="2"
                 colorScheme="teal"
-                isLoading={state.isLoading}
-                onClick={setContractGreeting}
+                onClick={handleMint}
+                isDisabled={submitDisabled}
               >
-                Mint NFT
+                Initiate Advance Stream
               </Button>
             </Box>
             <Divider my="8" borderColor="gray.400" />
             <Text mb="4" color={'white'}>This button only works on a Local Chain.</Text>
-            <Button
-              colorScheme="teal"
-              onClick={sendFunds}
-              isDisabled={!isLocalChain}
-            >
-              Send Funds From Local Hardhat Chain
-            </Button>
           </Box>
+          ) : (
+            <Flex>
+              {library ? (
+                <Flex>
+                  <SignIn />
+                  <SignUp />
+                </Flex>
+              ) : (
+                <ConnectWallet />
+              )}
+            </Flex>
+          )}
         </Layout>
-      </UserProvider>
-    </MoralisProvider>
   )
 }
 

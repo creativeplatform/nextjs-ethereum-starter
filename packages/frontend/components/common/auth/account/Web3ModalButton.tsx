@@ -27,12 +27,6 @@ export const Web3ModalButton = () => {
   }, [error]);
 
 
-  // Example for Polygon/Matic:
-  const customNetworkOptions = {
-    rpcUrl: process.env.NEXT_PUBLIC_MUMBAI,
-    chainId: 80001,
-  }
-
   const activateProvider = async () => {
     const providerOptions = {
       injected: {
