@@ -53,7 +53,7 @@ function HomeIndex(): JSX.Element {
     };
     await axios.request(options).then((response) => {
       setArtists(response.data);
-      setArtistSelectIsEnabled(false);
+      setArtistSelectIsDisabled(false);
       if (response.data.length === 1) {
         getCatalog();
       }

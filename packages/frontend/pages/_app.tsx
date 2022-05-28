@@ -12,7 +12,7 @@ import React from 'react'
 import { MulticallContract } from '../artifacts/contracts/contractAddress'
 import { MoralisProvider } from 'react-moralis'
 import { useApollo } from '../lib/apolloClient'
-import { AuthProvider, useAuth } from '../services/context/users'
+import { AuthProvider} from '../services/context/users'
 
 // scaffold-eth's INFURA_ID, SWAP IN YOURS FROM https://infura.io/dashboard/ethereum
 export const API_KEY = process.env.ALCHEMY_API_KEY;
