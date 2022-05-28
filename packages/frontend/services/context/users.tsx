@@ -1,32 +1,23 @@
-import { createContext, ReactElement, useContext, useEffect, useState } from "react";
-import { TextileInstance } from "../textile/textile";
-import { UserModel, DecryptedMessage } from "../textile/types";
-import { JsonRpcProvider } from "@ethersproject/providers";
-import { useEthers } from "@usedapp/core";
-import { PrivateKey } from "@textile/hub";
+import { createContext, useContext, useState } from "react"
+import { TextileInstance } from "../textile/textile"
+import { UserModel, DecryptedMessage } from "../textile/types"
+import { useEthers } from "@usedapp/core"
 
-// type UsersContextProps = {
-//     children?: ReactElement,
-//     userModel: UserModel,
-//     inboxMessages: DecryptedMessage[]
-// }
-
-type UserContext = {
+type AuthContext = {
     isLoggedIn?: boolean,
     user?: UserModel,
     role?: string,
     textileInstance?: TextileInstance,
     account?: string,
-    library?: JsonRpcProvider,
     inbox?: DecryptedMessage[],
     signUp?: (newUser: UserModel) => Promise<void>,
     logIn?: () => Promise<void>,
     logOut?: () => Promise<void>
 };
   
-const UsersContext = createContext<UserContext | undefined>(undefined);
+const AuthContext = createContext<AuthContext | undefined>(undefined);
 
-const UserProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [user, setUser] = useState<UserModel>();
     const [role, setRole] = useState<string>();
@@ -53,8 +44,6 @@ const UserProvider = ({ children }) => {
 
         const user: UserModel = await instance.setCurrentUser();
 
-        console.log({ user, msg: "logIn"})
-        
         setUser(user);
         setRole(user?.role);
 
@@ -72,13 +61,12 @@ const UserProvider = ({ children }) => {
     }
 
     return (
-        <UsersContext.Provider
+        <AuthContext.Provider
             value={{
                 isLoggedIn,
                 user,
                 role,
                 account,
-                library,
                 inbox,
                 signUp,
                 logIn,
@@ -86,16 +74,16 @@ const UserProvider = ({ children }) => {
             }}
         >
             {children}
-        </UsersContext.Provider>
+        </AuthContext.Provider>
     );
 }
 
-const useUsersContext = () => {
-    const context = useContext(UsersContext);
+const useAuth = () => {
+    const context = useContext(AuthContext);
     if (context === undefined) {
-      throw new Error('useOnboard must be used within a OnboardProvider');
+      throw new Error('useAuth must be used within a AuthProvider');
     }
     return context;
 };
 
-export { UserProvider, useUsersContext };
+export { AuthProvider, useAuth };

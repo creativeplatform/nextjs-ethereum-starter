@@ -22,8 +22,6 @@ import {
   Stack,
   useColorModeValue,
 } from "@chakra-ui/react";
-import Link from "next/link";
-import Image from "next/image";
 import SignIn, { EthereumAddress } from "./SignIn";
 import Logo from "./Logo-100";
 import { useEthers } from "@usedapp/core";
@@ -32,15 +30,7 @@ import { hashSync } from "bcryptjs";
 import { utils, BigNumber } from "ethers";
 import { TextileInstance } from "../../../services/textile/textile";
 import { createStandaloneToast } from "@chakra-ui/react";
-import { useUsersContext } from "../../../services/context/users";
-
-const check = () => {
-  if (localStorage.getItem("closeButtons") == "true") {
-    return true;
-  } else {
-    return false;
-  }
-};
+import { useAuth } from "../../../services/context/users";
 
 const SignUp = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -50,15 +40,12 @@ const SignUp = (props) => {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [secret, setSecret] = useState<String>();
+  const [secret, setSecret] = useState<string>();
   const [role, setRole] = useState("");
-  const [submitted, setSubmitted] = useState(false);
 
   const { account, library } = useEthers();
 
-  const { signUp } = useUsersContext();
-
-  const handleChange = (e: any) => setSecret(e.target.value);
+  const { signUp } = useAuth();
 
   const generateMessageForEntropy = (
     ethereum_address: EthereumAddress,
@@ -159,7 +146,7 @@ const SignUp = (props) => {
 
     const privateKey = await generatePrivateKey();
 
-    let newUser = {
+    const newUser = {
       name,
       username,
       email,

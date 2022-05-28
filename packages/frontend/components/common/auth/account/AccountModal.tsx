@@ -90,8 +90,6 @@ const BalanceWrapper = chakra(Box, {
     }
 })
 
-const HistoryWrapper = chakra(Box)
-
 const AccountAddress = chakra(Box, {
     baseStyle: {
         fontWeight: "700",
