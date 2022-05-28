@@ -52,9 +52,9 @@ function HomeIndex(): JSX.Element {
       }
     };
     await axios.request(options).then((response) => {
-      setArtists(response.data);
+      setArtists(response.data.results);
       setArtistSelectIsDisabled(true);
-      if (response.data.length === 1) {
+      if (response.data.results.length === 1) {
         getCatalog();
       }
     }).catch(function (error) {
@@ -73,16 +73,7 @@ function HomeIndex(): JSX.Element {
         apikey: 'af059dd1-1f0f-4acc-99d2-c27dd26a60d2'
       },
       params: {
-        links: [
-          {
-          title: track.title,
-          } 
-        ],
-        artist_info: {
           songstats_artist_id: artist.songstats_artist_id,
-          name: artist.name,
-          site_url: artist.site_url,
-        }
       }
     };
     await axios.request(options).then((response) => {
@@ -160,8 +151,8 @@ function HomeIndex(): JSX.Element {
             <Box>
               <Text>Pick Your Stage Name To Fetch All Tracks</Text>
               <Select isDisabled={artistSelectIsDisabled} onChange={handleArtist}>
-                {
-                  artists?.map((el, i) => {
+                {artists && console.log(artists)}
+                {artists && artists.map((el, i) => {
                     return (
                       <option key={i} value={i}>{el.name}</option>
                     )
