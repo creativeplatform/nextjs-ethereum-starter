@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Heading, Text, Select } from '@chakra-ui/react'
+import { Box, Button, Divider, Flex, Heading, Text, Select } from '@chakra-ui/react'
 import { useEthers } from '@usedapp/core'
 import { Contract } from 'ethers'
 import React, { useEffect } from 'react'
@@ -10,25 +10,27 @@ import { TextileInstance } from '../services/textile/textile'
 import abi from "../contracts/creative.abi.js"
 import address from "../contracts/YourCollectible.address"
 import { toast } from 'react-toastify'
-
-
+import ConnectWallet from "../components/common/auth/ConnectWallet";
+import SignIn from "../components/common/auth/SignIn";
+import SignUp from "../components/common/auth/SignUp";
 
 function HomeIndex(): JSX.Element {
   const { library } = useEthers();
   const { user } = useAuth();
 
-  const [submitEnabled, setSubmitEnabled] = React.useState(false);
+  const [submitDisabled, setSubmitDisabled] = React.useState(true);
+  const [trackSelectIsEnabled, setTrackSelectIsEnabled] = React.useState<boolean>(true);
+  const [artistSelectIsDisabled, setArtistSelectIsDisabled] = React.useState<boolean>(true);
   // const [preview, setPreview] = React.useState("");
 
   const [artists, setArtists] = React.useState<Artist[]>();
   const [artist, setArtist] = React.useState<Artist>();
   const [tracks, setTracks] = React.useState<Track[]>();
   const [track, setTrack] = React.useState<Track>();
-  const [trackSelectIsEnabled, setTrackSelectIsEnabled] = React.useState<boolean>(true);
 
   useEffect(() => {
-    getArtists();
-  }, []);
+    user ? getArtists() : undefined;
+  }, [user]);
 
   // create a preview as a side effect, whenever selected file is changed
   // useEffect(() => {
@@ -51,6 +53,7 @@ function HomeIndex(): JSX.Element {
     };
     await axios.request(options).then((response) => {
       setArtists(response.data);
+      setArtistSelectIsEnabled(false);
       if (response.data.length === 1) {
         getCatalog();
       }
@@ -98,14 +101,14 @@ function HomeIndex(): JSX.Element {
     };
     await axios.request(options).then((response) => {
       setTrack(response.data);
-      setSubmitEnabled(true);
+      setSubmitDisabled(true);
     }).catch(function (error) {
       console.error(error);
     });
   };
 
   const handleMint = async () => {
-    setSubmitEnabled(false);
+    setSubmitDisabled(false);
     // setSpin(true);
 
     const textileInstance = await TextileInstance.getInstance();
@@ -138,9 +141,16 @@ function HomeIndex(): JSX.Element {
           <Heading as="h1" mb="8">
             Creative
           </Heading>
-          { 
-            artists ? (
-              <Select onChange={handleArtist}>
+          <Text mt="8" fontSize="xl">
+            This page only works on the Kovan Testnet, Mumbai Testnet or on a Local Chain.
+          </Text>
+          {user ? (
+          <Box maxWidth="container.sm" p="8" mt="8" bg="gray.900">
+            <Text fontSize="xl" color={'white'}>Contract Address: {address}</Text>
+            <Divider my="8" borderColor="gray.400" />
+            <Box>
+              <Text>Pick Your Stage Name To Fetch All Tracks</Text>
+              <Select isDisabled={artistSelectIsDisabled} onChange={handleArtist}>
                 {
                   artists?.map((el, i) => {
                     return (
@@ -149,21 +159,9 @@ function HomeIndex(): JSX.Element {
                   })
                 }
               </Select>
-            )
-            : (
-              // <Spinner />
-              undefined
-            )  
-          }
-          <Text mt="8" fontSize="xl">
-            This page only works on the Kovan Testnet, Mumbai Testnet or on a Local Chain.
-          </Text>
-          <Box maxWidth="container.sm" p="8" mt="8" bg="gray.900">
-            <Text fontSize="xl" color={'white'}>Contract Address: {address}</Text>
-            <Divider my="8" borderColor="gray.400" />
-            <Box>
+              <Text>Pick A Track To Request An Advance</Text>
               <Select isDisabled={trackSelectIsEnabled} onChange={handleTrack}>
-                {tracks.map((el, i) => (
+                {tracks && tracks.map((el, i) => (
                   <option value={i}>
                     <Text fontSize="lg" color={'white'}>Image: {el && <img src={el?.avatar} />}</Text>
                     <Text fontSize="lg" color={'white'}>Track: {el && <span>{el?.title}</span>}</Text>
@@ -177,7 +175,7 @@ function HomeIndex(): JSX.Element {
                 mt="2"
                 colorScheme="teal"
                 onClick={handleMint}
-                isDisabled={submitEnabled}
+                isDisabled={submitDisabled}
               >
                 Initiate Advance Stream
               </Button>
@@ -185,6 +183,18 @@ function HomeIndex(): JSX.Element {
             <Divider my="8" borderColor="gray.400" />
             <Text mb="4" color={'white'}>This button only works on a Local Chain.</Text>
           </Box>
+          ) : (
+            <Flex>
+              {library ? (
+                <Flex>
+                  <SignIn />
+                  <SignUp />
+                </Flex>
+              ) : (
+                <ConnectWallet />
+              )}
+            </Flex>
+          )}
         </Layout>
   )
 }
