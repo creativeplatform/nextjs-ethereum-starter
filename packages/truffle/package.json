@@ -1,0 +1,37 @@
+{
+    "name": "creative",
+    "version": "1.0.0",
+    "description": "Creative - allowing for easy token crowdfunding.",
+    "main": "scripts/demo.js",
+    "scripts": {
+        "build": "truffle compile --all",
+        "test": "truffle test",
+        "deploy": "npm run build && RELEASE_VERSION=v1 npx truffle --network mumbai exec scripts/deploy.js",
+        "copy-watch": "nodemon --watch \"../../packages\" --ext \"js,ts,tsx,sol\" --exec rsync --archive --delete \"../../packages/\" \"./node_modules/@superfluid-finance/\""
+    },
+    "author": "Hebx",
+    "license": "MIT",
+    "devDependencies": {
+        "@decentral.ee/web3-helpers": "^0.5.3",
+        "@openzeppelin/contracts": "^4.5.0",
+        "@openzeppelin/test-helpers": "^0.5.15",
+        "@superfluid-finance/ethereum-contracts": "^1.1.0",
+        "@superfluid-finance/js-sdk": "^0.5.5",
+        "@truffle/contract": "^4.3.42",
+        "@truffle/hdwallet-provider": "^1.7.0",
+        "dotenv": "^10.0.0",
+        "truffle": "^5.4.21"
+    },
+    "dependencies": {
+        "@typechain/truffle-v5": "^8.0.0",
+        "ethers": "5.5.1",
+        "install": "^0.13.0",
+        "pm": "^2.2.6",
+        "truffle": "^5.5.16",
+        "truffle-hdwallet-provider": "^1.0.17",
+        "truffle-plugin-verify": "^0.5.25",
+        "ts-node": "^10.8.0",
+        "typechain": "^8.0.0",
+        "typescript": "^4.7.2"
+    }
+}
