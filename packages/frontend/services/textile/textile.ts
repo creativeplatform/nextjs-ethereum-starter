@@ -1,9 +1,10 @@
 import {
+    Artist,
     DecryptedMessage,
     NFTMetadata,
     TokenMetadata,
     UserModel,
-} from "./types";
+} from "./types"
 import {
     Where,
     WriteTransaction,
@@ -17,12 +18,11 @@ import {
     UserMessage,
     MailboxEvent,
     Query,
-    UserAuth,
     DBInfo,
     PublicKey,
-} from "@textile/hub";
-import { CoreAPI } from "@textile/eth-storage";
-import { BigNumber } from "ethers";
+} from "@textile/hub"
+import { CoreAPI } from "@textile/eth-storage"
+import { BigNumber } from "ethers"
 
 export class TextileInstance {
 
@@ -32,7 +32,8 @@ export class TextileInstance {
         n: "UserNFTList",
         u: "UserData",
         c: "Collections",
-        p: "Pools"
+        p: "Pools",
+        a: "ArtistStats"
     };
 
     private keyInfo: KeyInfo;
@@ -54,7 +55,6 @@ export class TextileInstance {
     private static singletonInstance: TextileInstance;
 
     private async init() {
-        console.log({ identity: TextileInstance.identity })
         await this.initializeClients();
         await this.initializeMailbox();
         await this.initializeBuckets();
@@ -80,7 +80,7 @@ export class TextileInstance {
             throw new Error("No bucket client or root key or tokenID");
         }
 
-        let buckets = await Buckets.withKeyInfo(this.keyInfo);
+        const buckets = await Buckets.withKeyInfo(this.keyInfo);
 
         await buckets.getToken(TextileInstance.identity);
 
@@ -110,7 +110,6 @@ export class TextileInstance {
             this.threadID = await this.client.newDB(
                 ThreadID.fromRandom(),
             );
-            console.log({ threadID: this.threadID });
             await this.client.newCollection(this.threadID, {
                 name: this.names.u
             });
@@ -123,10 +122,11 @@ export class TextileInstance {
             await this.client.newCollection(this.threadID, {
                 name: this.names.p,
             });
+            await this.client.newCollection(this.threadID, {
+                name: this.names.a,
+            });
         } else {
             this.threadID = ThreadID.fromString(thread.id);
-
-            console.log({ threadID: this.threadID });
         }
     }
 
@@ -166,18 +166,12 @@ export class TextileInstance {
         //     buf
         // );
 
-        console.log({
-            msg: "begin user upload"
-        })
-
         const user = {
             ...newUser,
             publicKey: TextileInstance.identity.public.toString()
         };
         
         await this.client.create(this.threadID, this.names.u, [user]);
-
-        console.log({ user })
 
         return user;
     }
@@ -343,11 +337,42 @@ export class TextileInstance {
         return await this.messageDecoder(reply.message);
     }
 
+    // : Artist
+    public async handleNewArtistStats(artist): Promise<void> {
+        if (!this.client) {
+            throw new Error("No client");
+        }
+        await this.client.create(this.threadID, this.names.a, [artist])
+    }
+
+    // : Artist
+    public async handleUpdateArtistStats(newArtist): Promise<void> {
+        if (!this.client) {
+            throw new Error("No client");
+        }
+
+        const tx: WriteTransaction = this.client.writeTransaction(
+            this.threadID,
+            this.names.a
+        );
+
+        await tx.start();
+
+        const artist: Artist = await tx.findByID(newArtist.songstats_artist_id);
+
+        artist.stats.map((platform, i) => {
+            platform.data.streams_total += newArtist.stats[i].data.streams_total;
+        });
+
+        await tx.save([artist]);
+        await tx.end();
+    }   
+
     public async uploadNFT(
         file: File,
-        name: string = "",
-        description: string = "",
-        attributes: string = '{"": any; }'
+        name: string,
+        description: string,
+        attributes: string
     ): Promise<NFTMetadata> {
         if (!this.bucketInfo.bucket || !this.bucketInfo.bucketKey) {
             throw new Error("No bucket client or root key");
@@ -363,8 +388,6 @@ export class TextileInstance {
             location,
             buf
         );
-        console.log("uploadnft func ");
-        console.log(raw);
         return {
             cid: raw.path.cid.toString(),
             name: name != "" ? name : uploadName,
@@ -419,36 +442,32 @@ export class TextileInstance {
 
         nft.tokenMetadataPath = location;
         nft.tokenMetadataURL = `/ipfs/${raw.path.cid.toString()}`;
-        console.log("uploadnftmetadata func ");
-        this.uploadnftmetadata(storage, tokenMeta);
-        console.log(raw);
         return {
           tokenMetadataPath: location,
           tokenMetadataURL: `/ipfs/${raw.path.cid.toString()}`
         }
     }
 
-    private async uploadnftmetadata(
-        storage: CoreAPI<BigNumber>,
+    public async uploadNFTMetadata(
         tokenMeta: TokenMetadata
     ) {
-        const blob = new Blob([JSON.stringify(tokenMeta)], {
-            type: "application/json",
-        });
-        const file = new File([blob], "metadata.json", {
-            type: "application/json",
-            lastModified: new Date().getTime(),
-        });
-        const { id, cid } = await storage.store(file);
-        console.log(JSON.stringify(tokenMeta));
-        console.log("textile cid", cid);
+        const uploadName = `${tokenMeta.name}.json`;
+        const location = `tokenmetadata/${uploadName}`;
+
+        const buf = Buffer.from(JSON.stringify(tokenMeta, null, 2));
+        const raw = await this.bucketInfo.bucket.pushPath(
+            this.bucketInfo.bucketKey,
+            location,
+            buf
+        );
+
+        return raw.path.cid;
     }
 
-    public async addNFTToUserCollection(nft: NFTMetadata) {
+    public async addNFTToUserCollection(nft: any) {
         if (!this.client) {
             throw new Error("No client");
         }
-        console.log("adding nft to user collection...");
         await this.client.create(this.threadID, this.names.n, [nft]);
     }
 
@@ -463,7 +482,6 @@ export class TextileInstance {
             this.names.n,
             {}
         );
-        console.log("All user memes:", memeList);
         return memeList;
     }
 }

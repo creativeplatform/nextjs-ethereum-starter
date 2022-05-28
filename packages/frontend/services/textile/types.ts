@@ -1,12 +1,3 @@
-export interface RoyaltyAdvance {
-    artistId: string;
-    artistName: string;
-    royaltiesPaid: number;
-    source: Array<string>;
-    numPlays: number;
-    datePaid: Date;
-}
-
 export interface UserModel {
     _id?: string;
     publicKey?: string;
@@ -22,6 +13,51 @@ export interface DecryptedMessage {
     from?: string;
     sent?: number;
     readAt?: number;
+}
+
+export interface PlatformStats {
+    data: {
+        streams_total: number;
+    };
+}
+
+export interface Artist {
+    songstats_artist_id: string;
+    avatar: string;
+    name: string;
+    site_url: string;
+    stats: PlatformStats[];
+}
+
+export interface ArtistsResponse {
+    results: Artist[];
+}
+
+export interface Track {
+    songstats_track_id: number;
+    avatar?: string;
+    title?: string;
+    artists?: any[]; 
+}
+
+export interface TrackStats {
+    date: string;
+    popularity_current: number;
+    streams_total: number;
+}
+
+export interface Item {
+    label: string;
+    value: string;
+}
+
+export interface RoyaltyAdvance {
+    artistId: string;
+    artistName: string;
+    royaltiesPaid: number;
+    source: string[];
+    numPlays: number;
+    datePaid: Date;
 }
 
 export interface NFTMetadata {

@@ -25,7 +25,7 @@ import ConnectWallet from '../common/auth/ConnectWallet'
 import Head, { MetaProps } from './Head'
 import { EmbedSDK, channels, OnSubscribeModal } from "@epnsproject/frontend-sdk-staging";
 import transakSDK from '@transak/transak-sdk';
-import { useUsersContext } from '../../services/context/users';
+import { useAuth } from '../../services/context/users';
 import SignIn from '../common/auth/SignIn';
 import SignUp from '../common/auth/SignUp';
 
@@ -72,7 +72,7 @@ interface LayoutProps {
 const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
   const { account, deactivate, active, chainId, library } = useEthers();
   const { notifications } = useNotifications();
-  const { isLoggedIn } = useUsersContext();
+  const { isLoggedIn } = useAuth();
 
   const [isSubscribed, setSubscribeStatus] = useState(false);
   const [channel, setChannel] = useState();

@@ -31,7 +31,7 @@ import { TextileInstance } from "../../../services/textile/textile";
 import SignUp from './SignUp';
 import Logo from './Logo-100';
 import { useEthers } from "@usedapp/core";
-import { useUsersContext } from "../../../services/context/users";
+import { useAuth } from "../../../services/context/users";
 import { UserModel } from "../../../services/textile/types";
 
 type WindowInstanceWithEthereum = Window & typeof globalThis & { ethereum?: providers.ExternalProvider };
@@ -53,9 +53,9 @@ const check = () => {
 const SignIn = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [closeButtons , setCloseButtons] = useState(false)
-  const [secret, setSecret] = useState<String>();
+  const [secret, setSecret] = useState<string>();
 
-  const { logIn } = useUsersContext();
+  const { logIn } = useAuth();
 
   const { account, library } = useEthers();
 
