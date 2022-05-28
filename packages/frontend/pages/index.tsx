@@ -48,12 +48,12 @@ function HomeIndex(): JSX.Element {
         apikey: 'af059dd1-1f0f-4acc-99d2-c27dd26a60d2'
       },
       params: {
-        name: user.username
+        name: 'Ariana Grande'
       }
     };
     await axios.request(options).then((response) => {
       setArtists(response.data);
-      setArtistSelectIsDisabled(false);
+      setArtistSelectIsDisabled(true);
       if (response.data.length === 1) {
         getCatalog();
       }
