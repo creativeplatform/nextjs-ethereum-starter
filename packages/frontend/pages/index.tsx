@@ -182,7 +182,13 @@ function HomeIndex(): JSX.Element {
               </Button>
             </Box>
             <Divider my="8" borderColor="gray.400" />
-            <Text mb="4" color={'white'}>This button only works on a Local Chain.</Text>
+            <Button
+                mt="2"
+                colorScheme="teal"
+                isDisabled={true}
+              >
+                Withdraw Funds
+              </Button>
           </Box>
           ) : (
             <Flex>
