@@ -48,7 +48,7 @@ function HomeIndex(): JSX.Element {
         apikey: 'af059dd1-1f0f-4acc-99d2-c27dd26a60d2'
       },
       params: {
-        name: 'Ariana Grande'
+        q: 'Ariana Grande'
       }
     };
     await axios.request(options).then((response) => {
@@ -73,7 +73,16 @@ function HomeIndex(): JSX.Element {
         apikey: 'af059dd1-1f0f-4acc-99d2-c27dd26a60d2'
       },
       params: {
-        songstats_artist_id: artist.songstats_artist_id
+        links: [
+          {
+          title: track.title,
+          } 
+        ],
+        artist_info: {
+          songstats_artist_id: artist.songstats_artist_id,
+          name: artist.name,
+          site_url: artist.site_url,
+        }
       }
     };
     await axios.request(options).then((response) => {
@@ -154,7 +163,7 @@ function HomeIndex(): JSX.Element {
                 {
                   artists?.map((el, i) => {
                     return (
-                      <option key={i} value={i}>el.name</option>
+                      <option key={i} value={i}>{el.name}</option>
                     )
                   })
                 }
@@ -164,6 +173,7 @@ function HomeIndex(): JSX.Element {
                 {tracks && tracks.map((el, i) => (
                   <option value={i}>
                     <Text fontSize="lg" color={'white'}>Image: {el && <img src={el?.avatar} />}</Text>
+                    <Text fontSize="lg" color={'white'}>Artists: {el && <span>{el?.artists}</span>}</Text>
                     <Text fontSize="lg" color={'white'}>Track: {el && <span>{el?.title}</span>}</Text>
                   </option>
                 ))}
