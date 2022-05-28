@@ -4,16 +4,14 @@ import { Contract } from 'ethers'
 import React, { useEffect } from 'react'
 import Layout from '../components/layout/Layout'
 import axios from 'axios'
-import { MoralisProvider } from 'react-moralis'
-import { AuthProvider, useAuth } from '../services/context/users'
+import { useAuth } from '../services/context/users'
 import { Artist, NFTMetadata, Track } from '../services/textile/types'
 import { TextileInstance } from '../services/textile/textile'
 import abi from "../contracts/creative.abi.js"
 import address from "../contracts/YourCollectible.address"
 import { toast } from 'react-toastify'
 
-const MORALIS_SERVER_URL="https://mhuq3oogbqkc.usemoralis.com:2053/server";
-const MORALIS_API_KEY="PHlSfKMAm45Y8HaNDsOImY3GI7Hst5AORiClsht6";
+
 
 function HomeIndex(): JSX.Element {
   const { library } = useEthers();
@@ -135,8 +133,7 @@ function HomeIndex(): JSX.Element {
   }
 
   return (
-    <MoralisProvider serverUrl={MORALIS_SERVER_URL} appId={MORALIS_API_KEY}>
-      <AuthProvider> 
+    
         <Layout>
           <Heading as="h1" mb="8">
             Creative
@@ -189,8 +186,6 @@ function HomeIndex(): JSX.Element {
             <Text mb="4" color={'white'}>This button only works on a Local Chain.</Text>
           </Box>
         </Layout>
-      </AuthProvider>
-    </MoralisProvider>
   )
 }
 
