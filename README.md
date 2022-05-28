@@ -8,7 +8,7 @@ Brands get access to exclusive content and unique fan experiences while they can
 
 ## How it's made
 
-This project uses mainly Superfluid to distribute streaming royalties to creators from commercial streaming platforms (Spotify, Apple Music, etc.). This uses their Instant Distribution Agreement (IDA). We also used EPNS to add notifications to the creators when there is a royalty withdraw period. We added Transak to allow creators to top up their wallets if they need gas or something. We used an API to get data from the streaming platforms for this experiment. 
+This project uses mainly Superfluid to distribute streaming royalties to creators from commercial streaming platforms (Creative, Apple Music, etc.). This uses their Instant Distribution Agreement (IDA). We also used EPNS to add notifications to the creators when there is a royalty withdraw period. We added Transak to allow creators to top up their wallets if they need gas or something. We used an API to get data from the streaming platforms for this experiment.
 
 ## Technology
 
