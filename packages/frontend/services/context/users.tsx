@@ -1,7 +1,6 @@
 import { createContext, useContext, useState } from "react"
 import { TextileInstance } from "../textile/textile"
 import { UserModel, DecryptedMessage } from "../textile/types"
-import { JsonRpcProvider } from "@ethersproject/providers"
 import { useEthers } from "@usedapp/core"
 
 type AuthContext = {
@@ -10,7 +9,6 @@ type AuthContext = {
     role?: string,
     textileInstance?: TextileInstance,
     account?: string,
-    library?: JsonRpcProvider,
     inbox?: DecryptedMessage[],
     signUp?: (newUser: UserModel) => Promise<void>,
     logIn?: () => Promise<void>,
@@ -69,7 +67,6 @@ const AuthProvider = ({ children }) => {
                 user,
                 role,
                 account,
-                library,
                 inbox,
                 signUp,
                 logIn,
